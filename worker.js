@@ -8,13 +8,15 @@ importScripts('./echarts.js');
 let canvas;
 
 const events = {
+  /** Echarts */
+  plot: null,
   async init(c) {
     canvas = c;
     echarts.setCanvasCreator(function () {
       return new OffscreenCanvas(32, 32);
     });
 
-    const plot = echarts.init(canvas);
+    const plot = this.plot = echarts.init(canvas);
     plot.setOption({
       title: {
         text: '堆叠区域图'
@@ -58,11 +60,27 @@ const events = {
     });
   },
 
+  addEventListener(type) {
+    this.plot.off(type);
+    this.plot.on(type, params => {
+      params.event = undefined;
+      postMessage(['event', params]);
+    });
+  },
+
+  removeEventListener(type) {
+    this.plot.off(type);
+  },
+
   event(type, eventInitDict) {
     canvas.dispatchEvent(Object.assign(new Event(type), eventInitDict));
-  }
+  },
+
+  callMethod(methodName, ...args) {
+    this.plot[methodName](...args);
+  },
 }
 
-onmessage = msg => {
-  events[msg.data.type](...msg.data.args);
+onmessage = async msg => {
+  postMessage(['finish', await events[msg.data.type](...msg.data.args)]);
 };
