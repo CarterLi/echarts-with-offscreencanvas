@@ -1,9 +1,13 @@
-# Echarts with OffscreenCanvas
+# OffscreenEcharts
 
-Echarts: https://github.com/apache/incubator-echarts
+Echarts with OffscreenCanvas
 
-OffscreenCanvas: https://developer.mozilla.org/en-US/docs/Web/API/OffscreenCanvas
+* Echarts: https://github.com/apache/incubator-echarts
 
-Original issue: https://github.com/apache/incubator-echarts/issues/9232
+* OffscreenCanvas: https://developer.mozilla.org/en-US/docs/Web/API/OffscreenCanvas
 
-Ref: https://segmentfault.com/a/1190000012563475
+* Original issue: https://github.com/apache/incubator-echarts/issues/9232
+
+* Supported browser: https://caniuse.com/#feat=offscreencanvas
+
+* Ref: https://segmentfault.com/a/1190000012563475

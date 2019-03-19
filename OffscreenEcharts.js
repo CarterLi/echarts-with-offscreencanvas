@@ -79,11 +79,23 @@ export class OffscreenEcharts {
     }, [offscreen]);
 
     mouseEventNames.map(eventType => {
+      // In order not to push too many (mousemove) events in queue,
+      // we will prevent new events from responding before
+      // previous event is handled.
+      // Don't mix different event types, as mousedown and click
+      // events are always triggered at the same time, thus click
+      // event will always be blocked.
+      let blockEvent = false;
       canvas.addEventListener(eventType, e => {
+        if (blockEvent) {
+          console.warn('blocking event', eventType);
+          return;
+        }
+        blockEvent = true;
         this.postMessage({
           type: 'event',
           args: [e.type, copyByKeys(e, mouseEventKeys)],
-        });
+        }).then(() => blockEvent = false);
       });
     });
 
