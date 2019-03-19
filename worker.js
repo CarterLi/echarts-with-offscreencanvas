@@ -1,6 +1,5 @@
 // Hack echarts
 this.window = this;
-this.addEventListener = function () {};
 
 importScripts('./echarts.js');
 
