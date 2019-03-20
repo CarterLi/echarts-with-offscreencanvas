@@ -43,3 +43,7 @@ const events = {
 onmessage = async msg => {
   postMessage(['finish', await events[msg.data.type](...msg.data.args)]);
 };
+
+self.open = (...args) => {
+  postMessage(['open', args]);
+};

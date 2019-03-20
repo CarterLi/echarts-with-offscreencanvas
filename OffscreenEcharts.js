@@ -7,8 +7,11 @@ function copyByKeys(data, keys) {
   return result;
 }
 
-const mouseEventKeys = ['screenX', 'screenY', 'clientX', 'clientY', 'offsetX', 'offsetY', 'ctrlKey', 'shiftKey', 'altKey', 'metaKey', 'button', 'buttons', 'movementX', 'movementY', 'pageX', 'pageY', 'region', 'which'];
-const mouseEventNames = ['click', 'dblclick', 'mouseover', 'mouseout', 'mousemove', 'mousedown', 'mouseup', 'globalout', 'contextmenu'];
+const mouseEventKeys = ['clientX', 'clientY', 'offsetX', 'offsetY', 'button', 'which', 'wheelDelta', 'detail'];
+const mouseEventNames = [
+  'click', 'dblclick', 'mousewheel', 'mouseout',
+  'mouseup', 'mousedown', 'contextmenu',
+];
 
 export class OffscreenEcharts {
   /** @type {HTMLCanvasElement} */
@@ -22,13 +25,18 @@ export class OffscreenEcharts {
       if (!Array.isArray(e.data)) throw new Error('Unknown message type posted', e);
       const [type, data] = e.data;
       switch (type) {
-        case 'finish':
+        case 'finish': {
           this._queue.shift().resolve(data);
           break;
+        }
         case 'event': {
           const { type } = data;
           delete data.type;
           this._eventTarget.dispatchEvent(Object.assign(new Event(type), data));
+          break;
+        }
+        case 'open': {
+          open(...data);
           break;
         }
       }
@@ -78,25 +86,29 @@ export class OffscreenEcharts {
       args: [offscreen],
     }, [offscreen]);
 
+    // In order not to push too many (mousemove) events in queue,
+    // we will prevent new events from responding before
+    // previous event is handled.
+    let blockEvent = false;
+    canvas.addEventListener('mousemove', e => {
+      if (blockEvent) {
+        console.warn('Blocking mousemove event', e);
+        return;
+      }
+      blockEvent = true;
+      this.postMessage({
+        type: 'event',
+        args: [e.type, copyByKeys(e, mouseEventKeys)],
+      }).then(() => blockEvent = false);
+    }, { passive: true });
+
     mouseEventNames.map(eventType => {
-      // In order not to push too many (mousemove) events in queue,
-      // we will prevent new events from responding before
-      // previous event is handled.
-      // Don't mix different event types, as mousedown and click
-      // events are always triggered at the same time, thus click
-      // event will always be blocked.
-      let blockEvent = false;
       canvas.addEventListener(eventType, e => {
-        if (blockEvent) {
-          console.warn('blocking event', eventType);
-          return;
-        }
-        blockEvent = true;
         this.postMessage({
           type: 'event',
           args: [e.type, copyByKeys(e, mouseEventKeys)],
-        }).then(() => blockEvent = false);
-      });
+        });
+      }, { passive: true });
     });
 
     return Promise.all(events2listen.map(x => this.postMessage({
