@@ -39,6 +39,19 @@ export class OffscreenEcharts {
           open(...data);
           break;
         }
+        case 'saveAsImage': {
+          var $a = document.createElement('a');
+          $a.download = data.fileName;
+          $a.target = '_blank';
+          $a.href = URL.createObjectURL(data.blob);
+          var evt = new MouseEvent('click', {
+            view: window,
+            bubbles: true,
+            cancelable: false
+          });
+          $a.dispatchEvent(evt);
+          setTimeout(() => URL.revokeObjectURL($a.href));
+        }
       }
     };
     this._worker.onerror = e => this._queue.shift().reject(e.error);
@@ -111,7 +124,7 @@ export class OffscreenEcharts {
       }, { passive: true });
     });
 
-    return Promise.all(events2listen.map(x => this.postMessage({
+    await Promise.all(events2listen.map(x => this.postMessage({
       type: 'addEventListener',
       args: [x],
     })));

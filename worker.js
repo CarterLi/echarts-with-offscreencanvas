@@ -1,22 +1,31 @@
 // Hack echarts
-this.window = this;
+self.window = self;
+self.devicePixelRatio = 2;
 
 importScripts('./echarts.js');
 
-/** @type {HTMLCanvasElement} canvas */
-let canvas;
+echarts.setCanvasCreator(function () {
+  return new OffscreenCanvas(32, 32);
+});
 
 const events = {
   /** Echarts */
   plot: null,
-  async init(c) {
-    canvas = c;
-    echarts.setCanvasCreator(function () {
-      return new OffscreenCanvas(32, 32);
-    });
+  /** @param {HTMLCanvasElement} canvas */
+  async init(canvas) {
+    if (this.plot) throw new Error('Has been initialized');
 
     const plot = this.plot = echarts.init(canvas);
-    plot.setOption(await fetch('./data.json').then(res => res.json()));
+    plot._api.saveAsImage = async opts => {
+      const { title, type } = opts;
+      const blob = await plot.getDom().convertToBlob({
+        type: 'image/' + type,
+      });
+      postMessage(['saveAsImage', {
+        blob,
+        fileName: `${title}.${type}`,
+      }]);
+    };
   },
 
   addEventListener(type) {
@@ -32,11 +41,16 @@ const events = {
   },
 
   event(type, eventInitDict) {
-    canvas.dispatchEvent(Object.assign(new Event(type), eventInitDict));
+    this.plot.getDom().dispatchEvent(Object.assign(new Event(type), eventInitDict));
   },
 
   callMethod(methodName, ...args) {
     this.plot[methodName](...args);
+  },
+
+  dispose() {
+    this.plot.dispose();
+    this.plot = null;
   },
 }
 
