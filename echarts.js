@@ -10982,7 +10982,7 @@ var ZRender = function (id, dom, opts) {
     this.storage = storage;
     this.painter = painter;
 
-    var handerProxy = !env$1.node ? new HandlerDomProxy(painter.getViewportRoot()) : null;
+    var handerProxy = (!env$1.node && !env$1.worker) ? new HandlerDomProxy(painter.getViewportRoot()) : null;
     this.handler = new Handler(storage, painter, handerProxy, painter.root);
 
     /**
@@ -70490,10 +70490,10 @@ var sunburstLayout = function (seriesType, ecModel, api, payload) {
                     ? unitRadian : (value * unitRadian);
                 if (angle < minAngle) {
                     angle = minAngle;
-
+                    
                 }
                 else {
-
+                    
                 }
 
                 endAngle = startAngle + dir * angle;
@@ -89376,25 +89376,20 @@ var proto$4 = SaveAsImage.prototype;
 proto$4.onclick = function (ecModel, api) {
     var model = this.model;
     var title = model.get('name') || ecModel.get('title.0.text') || 'echarts';
+    var $a = document.createElement('a');
     var type = model.get('type', true) || 'png';
-    var opts = {
+    $a.download = title + '.' + type;
+    $a.target = '_blank';
+    var url = api.getConnectedDataURL({
         type: type,
-        title: title,
         backgroundColor: model.get('backgroundColor', true)
             || ecModel.get('backgroundColor') || '#fff',
         excludeComponents: model.get('excludeComponents'),
         pixelRatio: model.get('pixelRatio')
-    };
-    if (typeof api.saveAsImage === 'function') {
-        return api.saveAsImage(opts);
-    }
-    var url = api.getConnectedDataURL(opts);
+    });
+    $a.href = url;
     // Chrome and Firefox
     if (typeof MouseEvent === 'function' && !env$1.browser.ie && !env$1.browser.edge) {
-        var $a = document.createElement('a');
-        $a.download = title + '.' + type;
-        $a.target = '_blank';
-        $a.href = url;
         var evt = new MouseEvent('click', {
             view: window,
             bubbles: true,
