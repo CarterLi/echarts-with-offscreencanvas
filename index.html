@@ -7,9 +7,19 @@
   <title>Echarts with OffscreenCanvas</title>
 </head>
 <body>
-  <header>
-    <button id="addEvent">添加点击事件</button>
-    <button id="delEvent">移除点击事件</button>
+  <header style="display: flex; justify-content: space-between;">
+    <div>
+      <select id="dataOption">
+        <option value="normal.json" selected>普通</option>
+        <option value="largeBar.json">大量数据——柱状图</option>
+        <option value="largeLine.json">大量数据——折线图</option>
+      </select>
+      <button id="loadData">加载数据</button>
+    </div>
+    <div>
+      <button id="addEvent">添加点击事件</button>
+      <button id="delEvent">移除点击事件</button>
+    </div>
   </header>
   <canvas width="1366" height="768"></canvas>
   <script type="module" src="./main.js"></script>

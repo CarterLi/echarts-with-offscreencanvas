@@ -1,5 +1,6 @@
 export class FallbackEcharts {
   constructor() {
+    // For better browser compatibility :(
     this._canvas = null;
     this._plot = null;
     this._eventTarget = document.createDocumentFragment();
@@ -7,7 +8,7 @@ export class FallbackEcharts {
 
   /** Bind events
    * @param {string} type
-   * @param {(event?: Event) => void} listener
+   * @param {(event: Event) => void} listener
    */
   on(type, listener) {
     this._plot.on(type, listener);

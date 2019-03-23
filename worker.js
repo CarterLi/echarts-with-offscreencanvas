@@ -9,7 +9,7 @@ echarts.setCanvasCreator(function () {
 });
 
 const events = {
-  /** Echarts */
+  /** @type {Echarts} */
   plot: null,
   /** @param {HTMLCanvasElement} canvas */
   async init(canvas) {
@@ -28,6 +28,7 @@ const events = {
     };
   },
 
+  /** @param {string} type */
   addEventListener(type) {
     this.plot.off(type);
     this.plot.on(type, params => {
@@ -36,6 +37,7 @@ const events = {
     });
   },
 
+  /** @param {string} type */
   removeEventListener(type) {
     this.plot.off(type);
   },

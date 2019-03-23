@@ -1,10 +1,9 @@
 const delay = duration => new Promise(resolve => setTimeout(resolve, duration));
 
-void async function main() {
-  let EchartsAdaptor;
+async function getEchartsAdaptor() {
   if (typeof OffscreenCanvas === 'function') {
     const { OffscreenEcharts } = await import('./OffscreenEcharts.js');
-    EchartsAdaptor = OffscreenEcharts;
+    return OffscreenEcharts;
   } else {
     await new Promise((resolve, reject) => {
       const script = document.createElement('script');
@@ -15,15 +14,38 @@ void async function main() {
       document.head.appendChild(script);
     });
     const { FallbackEcharts } = await import('./FallbackEcharts.js');
-    EchartsAdaptor = FallbackEcharts;
+    return FallbackEcharts;
   }
+}
+
+void async function main() {
+  const EchartsAdaptor = await getEchartsAdaptor();
   const echarts = new EchartsAdaptor();
   await echarts.init(document.querySelector('canvas'), ['click']);
-  await echarts.callMethod('showLoading');
-  const options = await fetch('./data.json').then(res => res.json());
-  await delay(2000);
-  await echarts.callMethod('setOption', options);
-  await echarts.callMethod('hideLoading');
+  function showLoading(loading = true) {
+    if (loading) {
+      return echarts.callMethod('showLoading', {
+        text: '努力加载中',
+        color: '#c23531',
+        textColor: '#04beb4',
+        maskColor: 'rgba(255, 255, 255, 0)',
+      });
+    } else {
+      return echarts.callMethod('hideLoading');
+    }
+  }
+  async function loadData() {
+    const file = document.getElementById('dataOption').value;
+    await showLoading();
+    const options = await fetch(file).then(res => res.json());
+    await echarts.callMethod('setOption', options);
+    await showLoading(false);
+  }
+  document.getElementById('loadData').onclick = loadData;
+
+  await showLoading();
+  await delay(1000);
+  await loadData();
 
   const events = [];
   document.getElementById('addEvent').onclick = async () => {
