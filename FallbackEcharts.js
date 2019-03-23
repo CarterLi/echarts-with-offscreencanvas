@@ -1,7 +1,6 @@
 export class FallbackEcharts {
   constructor() {
     // For better browser compatibility :(
-    this._canvas = null;
     this._plot = null;
     this._eventTarget = document.createDocumentFragment();
   }
@@ -27,11 +26,11 @@ export class FallbackEcharts {
   }
 
   /** Init echarts
-   * @param {HTMLCanvasElement} canvas
+   * @param {HTMLElement} el
+   * @param {string} theme
    **/
-  init(canvas) {
-    this._canvas = canvas;
-    this._plot = echarts.init(this._canvas);
+  init(el, theme) {
+    this._plot = echarts.init(el, theme);
   }
 
   /** @param {string} methodName */

@@ -14,8 +14,6 @@ const mouseEventNames = [
 ];
 
 export class OffscreenEcharts {
-  /** @type {HTMLCanvasElement} */
-  _canvas = null;
   _worker = new Worker('./worker.js');
   _queue = [];
   _eventTarget = document.createDocumentFragment();
@@ -103,17 +101,22 @@ export class OffscreenEcharts {
   }
 
   /** Init echarts
-   * @param {HTMLCanvasElement} canvas
+   * @param {HTMLElement} div
+   * @param {string} theme
    **/
-  async init(canvas) {
-    this._canvas = canvas;
+  async init(div, theme) {
+    const canvas = document.createElement('canvas');
+    canvas.style.cssText = 'width: 100%; height: 100%; margin: 0; user-select: none; border: 0;';
+    canvas.width = div.clientWidth;
+    canvas.height = div.clientHeight;
+    div.appendChild(canvas);
 
     /** @type {HTMLCanvasElement} */
     const offscreen = canvas.transferControlToOffscreen();
 
     await this.postMessage({
       type: 'init',
-      args: [offscreen],
+      args: [offscreen, theme, { devicePixelRatio }],
     }, [offscreen]);
 
     // In order not to push too many (mousemove) events in queue,

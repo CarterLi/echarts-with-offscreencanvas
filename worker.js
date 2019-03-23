@@ -1,10 +1,9 @@
 // Hack echarts
 self.window = self;
-self.devicePixelRatio = 2;
 
 importScripts('./echarts.js');
 
-echarts.setCanvasCreator(function () {
+echarts.setCanvasCreator(() => {
   return new OffscreenCanvas(32, 32);
 });
 
@@ -12,10 +11,11 @@ const events = {
   /** @type {Echarts} */
   plot: null,
   /** @param {HTMLCanvasElement} canvas */
-  async init(canvas) {
+  async init(canvas, theme, opts) {
     if (this.plot) throw new Error('Has been initialized');
 
-    const plot = this.plot = echarts.init(canvas);
+    self.devicePixelRatio = opts.devicePixelRatio;
+    const plot = this.plot = echarts.init(canvas, theme, opts);
     plot._api.saveAsImage = async opts => {
       const { title, type } = opts;
       const blob = await plot.getDom().convertToBlob({

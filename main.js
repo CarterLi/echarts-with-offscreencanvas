@@ -1,7 +1,7 @@
 const delay = duration => new Promise(resolve => setTimeout(resolve, duration));
 
-async function getEchartsAdaptor() {
-  if (typeof OffscreenCanvas === 'function') {
+async function getEchartsAdaptor(forceFallback) {
+  if (!forceFallback && typeof OffscreenCanvas === 'function') {
     const { OffscreenEcharts } = await import('./OffscreenEcharts.js');
     return OffscreenEcharts;
   } else {
@@ -18,10 +18,13 @@ async function getEchartsAdaptor() {
   }
 }
 
-void async function main() {
-  const EchartsAdaptor = await getEchartsAdaptor();
+async function startRender() {
+  const forceFallback = document.getElementById('forceFallback').checked;
+  const EchartsAdaptor = await getEchartsAdaptor(forceFallback);
   const echarts = new EchartsAdaptor();
-  await echarts.init(document.querySelector('canvas'), ['click']);
+  const div = document.getElementById('content');
+  div.style.cssText = 'width: 1366px; height: 768px';
+  await echarts.init(div);
   function showLoading(loading = true) {
     if (loading) {
       return echarts.callMethod('showLoading', {
@@ -38,7 +41,7 @@ void async function main() {
     const file = document.getElementById('dataOption').value;
     await showLoading();
     const options = await fetch(file).then(res => res.json());
-    await echarts.callMethod('setOption', options);
+    await echarts.callMethod('setOption', options, true);
     await showLoading(false);
   }
   document.getElementById('loadData').onclick = loadData;
@@ -54,4 +57,26 @@ void async function main() {
   document.getElementById('delEvent').onclick = () => {
     echarts.off(events.pop());
   };
+};
+
+void function main() {
+  if (typeof OffscreenCanvas !== 'function') {
+    document.getElementById('explain').textContent = '您的浏览器不支持 OffscreenCanvas，将自动降级至主线程渲染';
+    document.getElementById('forceFallback').disabled = true;
+    document.getElementById('forceFallback').checked = true;
+  } else {
+    document.getElementById('explain').textContent = '您的浏览器支持 OffscreenCanvas，可使用辅助线程渲染图表';
+  }
+  document.getElementById('start').onclick = () => {
+    document.getElementById('startField').disabled = true;
+    document.getElementById('optionField').disabled = false;
+    startRender();
+  };
+
+  let lastTime = 0, fps = document.getElementById('fps');
+  requestAnimationFrame(function run(t) {
+    fps.textContent = (1000 / (t - lastTime)).toFixed(3) + ' FPS';
+    lastTime = t;
+    requestAnimationFrame(run);
+  });
 }();
