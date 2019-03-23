@@ -15,10 +15,11 @@ const mouseEventNames = [
 
 export class OffscreenEcharts {
   /** @type {HTMLCanvasElement} */
-  _canvas;
+  _canvas = null;
   _worker = new Worker('./worker.js');
   _queue = [];
   _eventTarget = document.createDocumentFragment();
+  eventsMap = {};
 
   constructor() {
     this._worker.onmessage = e => {
@@ -59,22 +60,39 @@ export class OffscreenEcharts {
 
   /** Bind events
    * @param {string} type
-   * @param {(event?: CustomEvent<any[]>) => void} listener
+   * @param {(event?: Event) => void} listener
    */
-  on(type, listener) {
+  async on(type, listener) {
+    if (!this.eventsMap[type]) {
+      this.eventsMap[type] = 0;
+      await this.postMessage({
+        type: 'addEventListener',
+        args: [type],
+      });
+    }
+    console.assert(this.eventsMap[type] >= 0, 'Something must be wrong');
     this._eventTarget.addEventListener(type, listener);
-    return { event, listener };
+    ++this.eventsMap[type];
+    return { type, listener };
   }
 
   /** Unbind events
-   * @param {{ event: string; listener: (e: CustomEvent<any[]>) => void }} indicator
+   * @param {{ type: string; listener: (e: Event) => void }} indicator
    */
-  off(indicator) {
-    if (!indicator.event) return
-
-    this._eventTarget.removeEventListener(indicator.event, indicator.listener);
+  async off(indicator) {
+    if (!indicator.type) return
+    const { type, listener } = indicator;
+    if (this.eventsMap[type] === 1) {
+      await this.postMessage({
+        type: 'removeEventListener',
+        args: [type],
+      });
+    }
+    console.assert(this.eventsMap[type] > 0, 'Something must be wrong');
+    this._eventTarget.removeEventListener(type, listener);
     indicator.event = null;
     indicator.listener = null;
+    --this.eventsMap[type];
   }
 
   postMessage(...args) {
@@ -84,11 +102,10 @@ export class OffscreenEcharts {
     });
   }
 
-  /**
+  /** Init echarts
    * @param {HTMLCanvasElement} canvas
-   * @param {string[]} events2listen
    **/
-  async init(canvas, events2listen = []) {
+  async init(canvas) {
     this._canvas = canvas;
 
     /** @type {HTMLCanvasElement} */
@@ -115,7 +132,7 @@ export class OffscreenEcharts {
       }).then(() => blockEvent = false);
     }, { passive: true });
 
-    mouseEventNames.map(eventType => {
+    mouseEventNames.forEach(eventType => {
       canvas.addEventListener(eventType, e => {
         this.postMessage({
           type: 'event',
@@ -123,11 +140,6 @@ export class OffscreenEcharts {
         });
       }, { passive: true });
     });
-
-    await Promise.all(events2listen.map(x => this.postMessage({
-      type: 'addEventListener',
-      args: [x],
-    })));
   }
 
   /** @param {string} methodName */
