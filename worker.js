@@ -3,15 +3,13 @@ self.window = self;
 
 importScripts('./echarts.js');
 
-echarts.setCanvasCreator(() => {
-  return new OffscreenCanvas(32, 32);
-});
+echarts.setCanvasCreator(() => new OffscreenCanvas(32, 32));
 
 const events = {
   /** @type {Echarts} */
   plot: null,
   /** @param {HTMLCanvasElement} canvas */
-  async init(canvas, theme, opts) {
+  init(canvas, theme, opts) {
     if (this.plot) throw new Error('Has been initialized');
 
     self.devicePixelRatio = opts.devicePixelRatio;
@@ -56,8 +54,8 @@ const events = {
   },
 }
 
-onmessage = async msg => {
-  postMessage(['finish', await events[msg.data.type](...msg.data.args)]);
+onmessage = msg => {
+  postMessage(['finish', events[msg.data.type](...msg.data.args)]);
 };
 
 self.open = (...args) => {
