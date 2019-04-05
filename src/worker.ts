@@ -16,7 +16,7 @@ const events = new class WorkerEventHandler {
   init(canvas: OffscreenCanvas, theme: string, opts: any) {
     if (this.plot) throw new Error('Has been initialized');
 
-    (ctx as any).devicePixelRatio = opts.devicePixelRatio;
+    ctx.devicePixelRatio = opts.devicePixelRatio;
     const plot = this.plot = echarts.init(canvas as any, theme, opts);
     (plot as any)._api.saveAsImage = async opts => {
       const { title, type } = opts;
