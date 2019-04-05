@@ -32,22 +32,22 @@ const events = new class WorkerEventHandler {
 
   addEventListener(type: string) {
     this.plot.off(type);
-    this.plot.on(type, params => {
+    return this.plot.on(type, params => {
       params.event = undefined;
       ctx.postMessage(['event', params]);
     });
   }
 
   removeEventListener(type: string) {
-    this.plot.off(type);
+    return this.plot.off(type);
   }
 
   event(type: string, eventInitDict: object) {
-    this.plot.getDom().dispatchEvent(Object.assign(new Event(type), eventInitDict));
+    return this.getDom().dispatchEvent(Object.assign(new Event(type), eventInitDict));
   }
 
   callMethod(methodName: string, ...args: any[]) {
-    this.plot[methodName](...args);
+    return this.plot[methodName](...args);
   }
 
   dispose() {
@@ -61,5 +61,13 @@ ctx.open = (...args: any[]) => {
 };
 
 ctx.onmessage = msg => {
-  ctx.postMessage(['finish', events[msg.data.type](...msg.data.args)]);
+  try {
+    ctx.postMessage(['resolve', events[msg.data.type](...msg.data.args)]);
+  } catch (e) {
+    if (e instanceof Error) {
+      ctx.postMessage(['error', [e.name, e.message, e.stack]]);
+    } else {
+      ctx.postMessage(['reject', e]);
+    }
+  }
 };

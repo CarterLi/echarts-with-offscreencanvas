@@ -1,7 +1,17 @@
 const delay = duration => new Promise(resolve => setTimeout(resolve, duration));
 
+function getOffscreenCanvasSupport() {
+  if (typeof OffscreenCanvas === 'function') {
+    try {
+      const offscreen = new OffscreenCanvas(32, 32);
+      return !!offscreen.getContext('2d');
+    } catch {}
+    return false;
+  }
+}
+
 async function getEchartsAdaptor(forceFallback) {
-  if (!forceFallback && typeof OffscreenCanvas === 'function') {
+  if (!forceFallback && getOffscreenCanvasSupport()) {
     const { OffscreenEcharts } = await import('../dist/OffscreenEcharts.js');
     return OffscreenEcharts;
   } else {
@@ -60,7 +70,7 @@ async function startRender() {
 };
 
 void function main() {
-  if (typeof OffscreenCanvas !== 'function') {
+  if (!getOffscreenCanvasSupport()) {
     document.getElementById('explain').textContent = '您的浏览器不支持 OffscreenCanvas，将自动降级至主线程渲染';
     document.getElementById('forceFallback').disabled = true;
     document.getElementById('forceFallback').checked = true;

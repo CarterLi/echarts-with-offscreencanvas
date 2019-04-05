@@ -14,18 +14,13 @@ const mouseEventNames = [
 export class OffscreenEcharts {
     constructor() {
         this._worker = new Worker('dist/worker.js');
-        this._queue = [];
         this._eventTarget = document.createDocumentFragment();
         this._eventsMap = {};
-        this._worker.onmessage = e => {
-            if (!Array.isArray(e.data))
-                throw new Error('Unknown message type posted: ' + e);
+        this._promise = Promise.resolve(undefined);
+        this._worker.addEventListener('message', e => {
+            console.assert(Array.isArray(e.data), 'Unknown message type posted: ', e);
             const [type, data] = e.data;
             switch (type) {
-                case 'finish': {
-                    this._queue.shift().resolve(data);
-                    break;
-                }
                 case 'event': {
                     const { type } = data;
                     delete data.type;
@@ -50,8 +45,7 @@ export class OffscreenEcharts {
                     setTimeout(() => URL.revokeObjectURL($a.href));
                 }
             }
-        };
-        this._worker.onerror = e => this._queue.shift().reject(e.error);
+        });
     }
     async on(type, listener) {
         if (!this._eventsMap[type]) {
@@ -130,9 +124,34 @@ export class OffscreenEcharts {
     }
     /** Post message into worker thread; returned promise is resolved when get message back */
     postMessage(message, transfer) {
-        return new Promise((resolve, reject) => {
-            this._queue.push({ resolve, reject });
-            this._worker.postMessage(message, transfer);
+        return this._promise = this._promise.finally(() => {
+            return new Promise((resolve, reject) => {
+                this._worker.addEventListener('message', function onMessage(e) {
+                    console.assert(Array.isArray(e.data), 'Unknown message type posted: ', e);
+                    const [type, data] = e.data;
+                    switch (type) {
+                        case 'resolve': {
+                            resolve(data);
+                            this.removeEventListener('message', onMessage);
+                            break;
+                        }
+                        case 'reject': {
+                            reject(data);
+                            this.removeEventListener('message', onMessage);
+                            break;
+                        }
+                        case 'error': {
+                            const [name, message, stack] = data;
+                            const error = new self[name](message);
+                            error.stack = stack;
+                            reject(error);
+                            this.removeEventListener('message', onMessage);
+                            break;
+                        }
+                    }
+                });
+                this._worker.postMessage(message, transfer);
+            });
         });
     }
 }

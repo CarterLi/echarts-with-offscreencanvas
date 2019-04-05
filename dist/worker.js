@@ -28,19 +28,19 @@ const events = new class WorkerEventHandler {
     }
     addEventListener(type) {
         this.plot.off(type);
-        this.plot.on(type, params => {
+        return this.plot.on(type, params => {
             params.event = undefined;
             ctx.postMessage(['event', params]);
         });
     }
     removeEventListener(type) {
-        this.plot.off(type);
+        return this.plot.off(type);
     }
     event(type, eventInitDict) {
-        this.plot.getDom().dispatchEvent(Object.assign(new Event(type), eventInitDict));
+        return this.getDom().dispatchEvent(Object.assign(new Event(type), eventInitDict));
     }
     callMethod(methodName, ...args) {
-        this.plot[methodName](...args);
+        return this.plot[methodName](...args);
     }
     dispose() {
         this.plot.dispose();
@@ -51,6 +51,16 @@ ctx.open = (...args) => {
     ctx.postMessage(['open', args]);
 };
 ctx.onmessage = msg => {
-    ctx.postMessage(['finish', events[msg.data.type](...msg.data.args)]);
+    try {
+        ctx.postMessage(['resolve', events[msg.data.type](...msg.data.args)]);
+    }
+    catch (e) {
+        if (e instanceof Error) {
+            ctx.postMessage(['error', [e.name, e.message, e.stack]]);
+        }
+        else {
+            ctx.postMessage(['reject', e]);
+        }
+    }
 };
 //# sourceMappingURL=worker.js.map
