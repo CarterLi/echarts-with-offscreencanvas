@@ -6,9 +6,9 @@ importScripts('./echarts.js');
 echarts.setCanvasCreator(() => new OffscreenCanvas(32, 32));
 
 const events = {
-  /** @type {Echarts} */
+  /** @type {echarts.ECharts} */
   plot: null,
-  /** @param {HTMLCanvasElement} canvas */
+  /** @param {OffscreenCanvas} canvas */
   init(canvas, theme, opts) {
     if (this.plot) throw new Error('Has been initialized');
 

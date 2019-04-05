@@ -1,0 +1,16 @@
+{
+  "name": "echarts-with-offscreencanvas",
+  "version": "1.0.0",
+  "description": "Echarts with OffscreenCanvas",
+  "main": "main.js",
+  "repository": "git@github.com:CarterLi/echarts-with-offscreencanvas.git",
+  "author": "李通洲 <carter.li@eoitek.com>",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/echarts": "^4.1.8",
+    "typescript": "^3.4.1"
+  },
+  "scripts": {
+    "build": "tsc -p ."
+  }
+}

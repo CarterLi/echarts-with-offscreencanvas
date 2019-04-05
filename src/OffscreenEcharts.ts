@@ -1,5 +1,4 @@
-/** @param {string[]} keys */
-function copyByKeys(data, keys) {
+function copyByKeys(data: object, keys: string[]) {
   const result = {};
   keys.forEach(x => {
     if (x in data) result[x] = data[x];
@@ -13,15 +12,18 @@ const mouseEventNames = [
   'mouseup', 'mousedown', 'contextmenu',
 ];
 
-export class OffscreenEcharts {
-  _worker = new Worker('./worker.js');
-  _queue = [];
-  _eventTarget = document.createDocumentFragment();
-  eventsMap = {};
+export class OffscreenEcharts implements IECharts {
+  private _worker = new Worker('src/worker.js');
+  private _queue: Array<{
+    resolve: (value?: any | PromiseLike<any>) => void,
+    reject: (reason?: any) => void,
+  }> = [];
+  private _eventTarget = document.createDocumentFragment();
+  private _eventsMap: { [type: string]: number } = {};
 
   constructor() {
     this._worker.onmessage = e => {
-      if (!Array.isArray(e.data)) throw new Error('Unknown message type posted', e);
+      if (!Array.isArray(e.data)) throw new Error('Unknown message type posted: ' + e);
       const [type, data] = e.data;
       switch (type) {
         case 'finish': {
@@ -56,68 +58,49 @@ export class OffscreenEcharts {
     this._worker.onerror = e => this._queue.shift().reject(e.error);
   }
 
-  /** Bind events
-   * @param {string} type
-   * @param {(event?: Event) => void} listener
-   */
-  async on(type, listener) {
-    if (!this.eventsMap[type]) {
-      this.eventsMap[type] = 0;
+  async on(type: string, listener: (event: Event) => void) {
+    if (!this._eventsMap[type]) {
+      this._eventsMap[type] = 0;
       await this.postMessage({
         type: 'addEventListener',
         args: [type],
       });
     }
-    console.assert(this.eventsMap[type] >= 0, 'Something must be wrong');
+    console.assert(this._eventsMap[type] >= 0, 'Something must be wrong');
     this._eventTarget.addEventListener(type, listener);
-    ++this.eventsMap[type];
+    ++this._eventsMap[type];
     return { type, listener };
   }
 
-  /** Unbind events
-   * @param {{ type: string; listener: (e: Event) => void }} indicator
-   */
-  async off(indicator) {
+  async off(indicator: { type: string; listener: (e: Event) => void }) {
     if (!indicator.type) return
     const { type, listener } = indicator;
-    if (this.eventsMap[type] === 1) {
+    if (this._eventsMap[type] === 1) {
       await this.postMessage({
         type: 'removeEventListener',
         args: [type],
       });
     }
-    console.assert(this.eventsMap[type] > 0, 'Something must be wrong');
+    console.assert(this._eventsMap[type] > 0, 'Something must be wrong');
     this._eventTarget.removeEventListener(type, listener);
-    indicator.event = null;
+    indicator.type = null;
     indicator.listener = null;
-    --this.eventsMap[type];
+    --this._eventsMap[type];
   }
 
-  postMessage(...args) {
-    return new Promise((resolve, reject) => {
-      this._queue.push({ resolve, reject });
-      this._worker.postMessage(...args);
-    });
-  }
-
-  /** Init echarts
-   * @param {HTMLElement} div
-   * @param {string} theme
-   **/
-  async init(div, theme) {
+  async init(div: HTMLDivElement, theme: string) {
     const canvas = document.createElement('canvas');
     canvas.style.cssText = 'width: 100%; height: 100%; margin: 0; user-select: none; border: 0;';
     canvas.width = div.clientWidth;
     canvas.height = div.clientHeight;
     div.appendChild(canvas);
 
-    /** @type {HTMLCanvasElement} */
     const offscreen = canvas.transferControlToOffscreen();
 
     await this.postMessage({
       type: 'init',
       args: [offscreen, theme, { devicePixelRatio }],
-    }, [offscreen]);
+    }, [offscreen as any]);
 
     // In order not to push too many (mousemove) events in queue,
     // we will prevent new events from responding before
@@ -145,8 +128,7 @@ export class OffscreenEcharts {
     });
   }
 
-  /** @param {string} methodName */
-  callMethod(methodName, ...args) {
+  callMethod(methodName: string, ...args: any[]) {
     return this.postMessage({
       type: 'callMethod',
       args: [methodName, ...args],
@@ -156,5 +138,13 @@ export class OffscreenEcharts {
   async terminate(disposeEchartsFirst = true) {
     if (disposeEchartsFirst) await this.postMessage('dispose');
     this._worker.terminate();
+  }
+
+  /** Post message into worker thread; returned promise is resolved when get message back */
+  private postMessage(message: any, transfer?: Transferable[]) {
+    return new Promise<any>((resolve, reject) => {
+      this._queue.push({ resolve, reject });
+      this._worker.postMessage(message, transfer);
+    });
   }
 }

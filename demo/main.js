@@ -2,18 +2,18 @@ const delay = duration => new Promise(resolve => setTimeout(resolve, duration));
 
 async function getEchartsAdaptor(forceFallback) {
   if (!forceFallback && typeof OffscreenCanvas === 'function') {
-    const { OffscreenEcharts } = await import('./OffscreenEcharts.js');
+    const { OffscreenEcharts } = await import('../dist/OffscreenEcharts.js');
     return OffscreenEcharts;
   } else {
     await new Promise((resolve, reject) => {
       const script = document.createElement('script');
       script.async = true;
-      script.src = './echarts.js';
+      script.src = '../src/echarts.js';
       script.onload = resolve;
       script.onerror = reject;
       document.head.appendChild(script);
     });
-    const { FallbackEcharts } = await import('./FallbackEcharts.js');
+    const { FallbackEcharts } = await import('../dist/FallbackEcharts.js');
     return FallbackEcharts;
   }
 }
@@ -40,7 +40,7 @@ async function startRender() {
   async function loadData() {
     const file = document.getElementById('dataOption').value;
     await showLoading();
-    const options = await fetch(file).then(res => res.json());
+    const options = await fetch('demo/' + file).then(res => res.json());
     await echarts.callMethod('setOption', options, true);
     await showLoading(false);
   }
