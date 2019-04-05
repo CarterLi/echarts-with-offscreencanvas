@@ -13,7 +13,7 @@ const mouseEventNames = [
 ];
 export class OffscreenEcharts {
     constructor() {
-        this._worker = new Worker('src/worker.js');
+        this._worker = new Worker('dist/worker.js');
         this._queue = [];
         this._eventTarget = document.createDocumentFragment();
         this._eventsMap = {};

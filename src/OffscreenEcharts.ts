@@ -13,7 +13,7 @@ const mouseEventNames = [
 ];
 
 export class OffscreenEcharts implements IECharts {
-  private _worker = new Worker('src/worker.js');
+  private _worker = new Worker('dist/worker.js');
   private _queue: Array<{
     resolve: (value?: any | PromiseLike<any>) => void,
     reject: (reason?: any) => void,

@@ -22,13 +22,15 @@ interface OffscreenCanvas extends EventTarget {
   /**
    * Creates a Blob object representing the image contained in the canvas
    */
-  convertToBlob(options?: { type: string; quality: number }): Promise<Blob>;
+  convertToBlob(options?: { type: string; quality?: number }): Promise<Blob>;
 
   /**
    * Creates an ImageBitmap object from the most recently rendered image of the OffscreenCanvas
    */
   transferToImageBitmap(): ImageBitmap;
 }
+
+declare const OffscreenCanvas: OffscreenCanvas;
 
 interface HTMLCanvasElement {
   transferControlToOffscreen(): OffscreenCanvas;

@@ -8,7 +8,7 @@ async function getEchartsAdaptor(forceFallback) {
     await new Promise((resolve, reject) => {
       const script = document.createElement('script');
       script.async = true;
-      script.src = '../src/echarts.js';
+      script.src = '../dist/echarts.js';
       script.onload = resolve;
       script.onerror = reject;
       document.head.appendChild(script);

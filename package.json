@@ -11,6 +11,6 @@
     "typescript": "^3.4.1"
   },
   "scripts": {
-    "build": "tsc -p ."
+    "build": "tsc -p . && (cd dist && ln -s ../src/echarts.js -f)"
   }
 }
