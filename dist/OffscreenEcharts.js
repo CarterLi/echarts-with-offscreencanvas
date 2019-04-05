@@ -32,17 +32,11 @@ export class OffscreenEcharts {
                     break;
                 }
                 case 'saveAsImage': {
-                    var $a = document.createElement('a');
-                    $a.download = data.fileName;
+                    const $a = document.createElement('a');
+                    $a.download = `${data.title}.${data.type}`;
                     $a.target = '_blank';
-                    $a.href = URL.createObjectURL(data.blob);
-                    var evt = new MouseEvent('click', {
-                        view: window,
-                        bubbles: true,
-                        cancelable: false
-                    });
-                    $a.dispatchEvent(evt);
-                    setTimeout(() => URL.revokeObjectURL($a.href));
+                    $a.href = this._canvas.toDataURL('image/' + data.type, data.quality);
+                    $a.click();
                 }
             }
         });
@@ -77,7 +71,7 @@ export class OffscreenEcharts {
         --this._eventsMap[type];
     }
     async init(div, theme) {
-        const canvas = document.createElement('canvas');
+        const canvas = this._canvas = document.createElement('canvas');
         canvas.style.cssText = 'width: 100%; height: 100%; margin: 0; user-select: none; border: 0;';
         canvas.width = div.clientWidth;
         canvas.height = div.clientHeight;

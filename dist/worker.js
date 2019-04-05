@@ -16,14 +16,7 @@ const events = new class WorkerEventHandler {
         ctx.devicePixelRatio = opts.devicePixelRatio;
         const plot = this.plot = echarts.init(canvas, theme, opts);
         plot._api.saveAsImage = async (opts) => {
-            const { title, type } = opts;
-            const blob = await this.getDom().convertToBlob({
-                type: 'image/' + type,
-            });
-            ctx.postMessage(['saveAsImage', {
-                    blob,
-                    fileName: `${title}.${type}`,
-                }]);
+            ctx.postMessage(['saveAsImage', opts]);
         };
     }
     addEventListener(type) {
