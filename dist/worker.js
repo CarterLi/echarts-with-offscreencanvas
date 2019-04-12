@@ -7,9 +7,6 @@ const events = new class WorkerEventHandler {
     constructor() {
         this.plot = null;
     }
-    getDom() {
-        return this.plot.getDom();
-    }
     init(canvas, theme, opts) {
         if (this.plot)
             throw new Error('Has been initialized');
@@ -30,7 +27,8 @@ const events = new class WorkerEventHandler {
         return this.plot.off(type);
     }
     event(type, eventInitDict) {
-        return this.getDom().dispatchEvent(Object.assign(new Event(type), eventInitDict));
+        return this.plot.getDom()
+            .dispatchEvent(Object.assign(new Event(type), eventInitDict));
     }
     callMethod(methodName, ...args) {
         return this.plot[methodName](...args);

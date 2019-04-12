@@ -1,32 +1,6 @@
 const delay = duration => new Promise(resolve => setTimeout(resolve, duration));
 
-function getOffscreenCanvasSupport() {
-  if (typeof OffscreenCanvas === 'function') {
-    try {
-      const offscreen = new OffscreenCanvas(32, 32);
-      return !!offscreen.getContext('2d');
-    } catch {}
-    return false;
-  }
-}
-
-async function getEchartsAdaptor(forceFallback) {
-  if (!forceFallback && getOffscreenCanvasSupport()) {
-    const { OffscreenEcharts } = await import('../dist/OffscreenEcharts.js');
-    return OffscreenEcharts;
-  } else {
-    await new Promise((resolve, reject) => {
-      const script = document.createElement('script');
-      script.async = true;
-      script.src = '../dist/echarts.js';
-      script.onload = resolve;
-      script.onerror = reject;
-      document.head.appendChild(script);
-    });
-    const { FallbackEcharts } = await import('../dist/FallbackEcharts.js');
-    return FallbackEcharts;
-  }
-}
+import { getEchartsAdaptor, getOffscreenCanvasSupport } from '../dist/EchartsAdaptor.js';
 
 async function startRender() {
   const forceFallback = document.getElementById('forceFallback').checked;

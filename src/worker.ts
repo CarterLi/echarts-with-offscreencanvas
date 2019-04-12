@@ -9,10 +9,6 @@ echarts.setCanvasCreator(() => new OffscreenCanvas(32, 32));
 const events = new class WorkerEventHandler {
   plot: echarts.ECharts = null;
 
-  getDom() {
-    return this.plot.getDom() as any as OffscreenCanvas;
-  }
-
   init(canvas: OffscreenCanvas, theme: string, opts: any) {
     if (this.plot) throw new Error('Has been initialized');
 
@@ -36,7 +32,8 @@ const events = new class WorkerEventHandler {
   }
 
   event(type: string, eventInitDict: object) {
-    return this.getDom().dispatchEvent(Object.assign(new Event(type), eventInitDict));
+    return (this.plot.getDom() as any as OffscreenCanvas)
+      .dispatchEvent(Object.assign(new Event(type), eventInitDict));
   }
 
   callMethod(methodName: string, ...args: any[]) {
