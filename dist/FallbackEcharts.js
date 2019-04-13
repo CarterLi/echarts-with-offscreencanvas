@@ -1,3 +1,4 @@
+import echarts from './echarts.js';
 export class FallbackEcharts {
     constructor() {
         this._plot = null;
@@ -18,6 +19,9 @@ export class FallbackEcharts {
     }
     async callMethod(methodName, ...args) {
         return this._plot[methodName](...args);
+    }
+    async setOption(option, ...args) {
+        return this._plot.setOption(option, ...args);
     }
     async terminate() {
         this._plot.dispose();

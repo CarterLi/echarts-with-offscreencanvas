@@ -1,8 +1,7 @@
-const ctx = self;
-// Hack echarts
-ctx.window = self;
-ctx.importScripts('./echarts.js');
+import { parse } from './SafeJson.js';
+import echarts from './echarts.js';
 echarts.setCanvasCreator(() => new OffscreenCanvas(32, 32));
+const ctx = self;
 const events = new class WorkerEventHandler {
     constructor() {
         this.plot = null;
@@ -33,11 +32,14 @@ const events = new class WorkerEventHandler {
     callMethod(methodName, ...args) {
         return this.plot[methodName](...args);
     }
+    setOption(json, ...args) {
+        return this.plot.setOption(parse(json), ...args);
+    }
     dispose() {
         this.plot.dispose();
         this.plot = null;
     }
-};
+}();
 ctx.open = (...args) => {
     ctx.postMessage(['open', args]);
 };
@@ -54,4 +56,4 @@ ctx.onmessage = msg => {
         }
     }
 };
-//# sourceMappingURL=worker.js.map
+//# sourceMappingURL=renderer.worker.js.map

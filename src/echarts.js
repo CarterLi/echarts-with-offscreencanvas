@@ -1,8 +1,6 @@
-(function (global, factory) {
-	typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
-	typeof define === 'function' && define.amd ? define(['exports'], factory) :
-	(factory((global.echarts = {})));
-}(this, (function (exports) { 'use strict';
+const exports = {};
+
+if (!self.window) self.window = self;
 
 /*
 * Licensed to the Apache Software Foundation (ASF) under one
@@ -93939,5 +93937,4 @@ exports.Model = Model;
 exports.Axis = Axis;
 exports.env = env$1;
 
-})));
-//# sourceMappingURL=echarts.js.map
+export default exports;

@@ -1,3 +1,5 @@
+import { stringify } from './SafeJson.js';
+
 function copyByKeys(data: object, keys: string[]) {
   const result = {};
   keys.forEach(x => {
@@ -13,7 +15,7 @@ const mouseEventNames = [
 ];
 
 export class OffscreenEcharts implements IECharts {
-  private _worker = new Worker('dist/worker.js');
+  private _worker = new Worker('dist/renderer.worker.js', { type: 'module' });
   private _eventTarget = document.createDocumentFragment();
   private _eventsMap: { [type: string]: number } = {};
   private _promise = Promise.resolve<any>(undefined);
@@ -60,7 +62,7 @@ export class OffscreenEcharts implements IECharts {
   }
 
   async off(indicator: { type: string; listener: (e: Event) => void }) {
-    if (!indicator.type) return
+    if (!indicator.type) return;
     const { type, listener } = indicator;
     if (this._eventsMap[type] === 1) {
       await this.postMessage({
@@ -119,6 +121,13 @@ export class OffscreenEcharts implements IECharts {
     return this.postMessage({
       type: 'callMethod',
       args: [methodName, ...args],
+    });
+  }
+
+  setOption(option: object, ...args: any[]) {
+    return this.postMessage({
+      type: 'setOption',
+      args: [stringify(option), ...args],
     });
   }
 

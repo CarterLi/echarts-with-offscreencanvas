@@ -1,3 +1,4 @@
+import { stringify } from './SafeJson.js';
 function copyByKeys(data, keys) {
     const result = {};
     keys.forEach(x => {
@@ -13,7 +14,7 @@ const mouseEventNames = [
 ];
 export class OffscreenEcharts {
     constructor() {
-        this._worker = new Worker('dist/worker.js');
+        this._worker = new Worker('dist/renderer.worker.js', { type: 'module' });
         this._eventTarget = document.createDocumentFragment();
         this._eventsMap = {};
         this._promise = Promise.resolve(undefined);
@@ -109,6 +110,12 @@ export class OffscreenEcharts {
         return this.postMessage({
             type: 'callMethod',
             args: [methodName, ...args],
+        });
+    }
+    setOption(option, ...args) {
+        return this.postMessage({
+            type: 'setOption',
+            args: [stringify(option), ...args],
         });
     }
     async terminate(disposeEchartsFirst = true) {

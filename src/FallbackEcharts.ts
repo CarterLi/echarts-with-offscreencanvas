@@ -1,3 +1,5 @@
+import echarts from './echarts.js';
+
 export class FallbackEcharts implements IECharts {
   private _plot: echarts.ECharts = null;
 
@@ -20,6 +22,10 @@ export class FallbackEcharts implements IECharts {
 
   async callMethod(methodName: string, ...args: any[]) {
     return this._plot[methodName](...args);
+  }
+
+  async setOption(option: object, ...args: any[]) {
+    return this._plot.setOption(option, ...args);
   }
 
   async terminate() {

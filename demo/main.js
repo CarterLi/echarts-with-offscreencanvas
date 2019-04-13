@@ -25,7 +25,7 @@ async function startRender() {
     const file = document.getElementById('dataOption').value;
     await showLoading();
     const options = await fetch('demo/' + file).then(res => res.json());
-    await echarts.callMethod('setOption', options, true);
+    await echarts.setOption(options, true);
     await showLoading(false);
   }
   document.getElementById('loadData').onclick = loadData;

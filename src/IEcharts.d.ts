@@ -31,6 +31,14 @@ interface IECharts {
    */
   callMethod(methodName: string, ...args: any[]): Promise<any>;
 
+  /**
+   * Set echarts option
+   * @param option Configuration item and data
+   * @param args Other params to be passed in
+   * @see https://echarts.baidu.com/api.html#echartsInstance.setOption
+   */
+  setOption(option: object, ...args: any[]): Promise<void>;
+
   /** Dispose ECharts instance and terminate worker thread */
   terminate(): Promise<void>;
 }

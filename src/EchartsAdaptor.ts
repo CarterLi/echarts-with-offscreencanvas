@@ -4,8 +4,8 @@ export function getOffscreenCanvasSupport() {
       const offscreen = new OffscreenCanvas(32, 32);
       return !!offscreen.getContext('2d');
     } catch {}
-    return false;
   }
+  return false;
 }
 
 export async function getEchartsAdaptor(forceFallback = false) {
@@ -13,17 +13,6 @@ export async function getEchartsAdaptor(forceFallback = false) {
     const { OffscreenEcharts } = await import('./OffscreenEcharts.js');
     return OffscreenEcharts;
   } else {
-    if (typeof echarts === 'undefined') {
-      await new Promise((resolve, reject) => {
-        const script = document.createElement('script');
-        script.async = true;
-        const { url } = import.meta as any as { url: string };
-        script.src = url.slice(0, url.lastIndexOf('/')) + '/echarts.js';
-        script.onload = resolve;
-        script.onerror = reject;
-        document.head.appendChild(script);
-      });
-    }
     const { FallbackEcharts } = await import('./FallbackEcharts.js');
     return FallbackEcharts;
   }
