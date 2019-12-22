@@ -24,6 +24,7 @@ Echarts with OffscreenCanvas
 
 1. Remove `&& !env.worker`
 1. Modify `SaveAsImage.prototype.onclick` to let it support `OffscreenCanvas`
+1. Optional: Remove UMD sh*t
 
 See `patch.diff`
 
@@ -37,4 +38,4 @@ See `patch.diff`
 
 See Github Page: https://carterli.github.io/echarts-with-offscreencanvas/
 
-Support the latest Chrome & Opera. Fallback version support Safari & Firefox 67 ( because older FireFox versions and Edge lack [dynamic import](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/import#Dynamic_Imports) support )
+Support Chrome Canary & Opera Canary ( due to using of module scripts on worker ). Fallback version support Safari & Firefox 67 ( because older FireFox versions and Edge lack [dynamic import](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/import#Dynamic_Imports) support )

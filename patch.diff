@@ -1,17 +1,19 @@
-From 0317d8ba385f42c610007be5ac62b6ca132b0c58 Mon Sep 17 00:00:00 2001
-From: =?UTF-8?q?=E6=9D=8E=E9=80=9A=E6=B4=B2?= <carter.li@eoitek.com>
-Date: Sat, 23 Mar 2019 09:38:07 +0800
-Subject: [PATCH] Patch echarts source code
-
----
- echarts.js | 23 ++++++++++++++---------
- 1 file changed, 14 insertions(+), 9 deletions(-)
-
-diff --git a/echarts.js b/echarts.js
-index c9be458..2a3a5ee 100644
---- a/echarts.js
-+++ b/echarts.js
-@@ -10982,7 +10982,7 @@ var ZRender = function (id, dom, opts) {
+diff --git a/src/echarts.js b/src/echarts.js
+index c79a31a..9e2c45c 100644
+--- a/src/echarts.js
++++ b/src/echarts.js
+@@ -1,8 +1,5 @@
+-(function (global, factory) {
+-	typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
+-	typeof define === 'function' && define.amd ? define(['exports'], factory) :
+-	(factory((global.echarts = {})));
+-}(this, (function (exports) { 'use strict';
++const exports = {};
++if (!self.window) self.window = self;
+ 
+ /*
+ * Licensed to the Apache Software Foundation (ASF) under one
+@@ -11270,7 +11267,7 @@ var ZRender = function (id, dom, opts) {
      this.storage = storage;
      this.painter = painter;
  
@@ -20,51 +22,36 @@ index c9be458..2a3a5ee 100644
      this.handler = new Handler(storage, painter, handerProxy, painter.root);
  
      /**
-@@ -70490,10 +70490,10 @@ var sunburstLayout = function (seriesType, ecModel, api, payload) {
-                     ? unitRadian : (value * unitRadian);
-                 if (angle < minAngle) {
-                     angle = minAngle;
--                    
-+
-                 }
-                 else {
--                    
-+
-                 }
+@@ -25334,7 +25331,7 @@ var seriesColor = {
  
-                 endAngle = startAngle + dir * angle;
-@@ -89376,20 +89376,25 @@ var proto$4 = SaveAsImage.prototype;
- proto$4.onclick = function (ecModel, api) {
-     var model = this.model;
-     var title = model.get('name') || ecModel.get('title.0.text') || 'echarts';
--    var $a = document.createElement('a');
+         // FIXME Set color function or use the platte color
+         data.setVisual('color', color);
+-        
++
+         var borderColorAccessPath = (seriesModel.visualBorderColorAccessPath || 'itemStyle.borderColor').split('.');
+         var borderColor = seriesModel.get(borderColorAccessPath);
+         data.setVisual('borderColor', borderColor);
+@@ -77437,12 +77434,16 @@ proto$2.onclick = function (ecModel, api) {
      var type = model.get('type', true) || 'png';
--    $a.download = title + '.' + type;
--    $a.target = '_blank';
--    var url = api.getConnectedDataURL({
-+    var opts = {
+     var url = api.getConnectedDataURL({
          type: type,
 +        title: title,
          backgroundColor: model.get('backgroundColor', true)
              || ecModel.get('backgroundColor') || '#fff',
+         connectedBackgroundColor: model.get('connectedBackgroundColor'),
          excludeComponents: model.get('excludeComponents'),
          pixelRatio: model.get('pixelRatio')
--    });
--    $a.href = url;
-+    };
+     });
 +    if (typeof api.saveAsImage === 'function') {
 +        return api.saveAsImage(opts);
 +    }
-+    var url = api.getConnectedDataURL(opts);
      // Chrome and Firefox
      if (typeof MouseEvent === 'function' && !env$1.browser.ie && !env$1.browser.edge) {
-+        var $a = document.createElement('a');
-+        $a.download = title + '.' + type;
-+        $a.target = '_blank';
-+        $a.href = url;
-         var evt = new MouseEvent('click', {
-             view: window,
-             bubbles: true,
--- 
-2.21.0
-
+         var $a = document.createElement('a');
+@@ -96228,5 +96229,4 @@ exports.Model = Model;
+ exports.Axis = Axis;
+ exports.env = env$1;
+ 
+-})));
+-//# sourceMappingURL=echarts.js.map
++export default exports;

@@ -7,8 +7,8 @@
   "author": "李通洲 <carter.li@eoitek.com>",
   "license": "MIT",
   "devDependencies": {
-    "@types/echarts": "^4.1.8",
-    "typescript": "^3.4.3"
+    "@types/echarts": "^4.4.2",
+    "typescript": "^3.7.4"
   },
   "scripts": {
     "build": "tsc -p . && (cd dist && ln -s ../src/echarts.js -f)"

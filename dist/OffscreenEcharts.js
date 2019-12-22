@@ -125,7 +125,7 @@ export class OffscreenEcharts {
     }
     /** Post message into worker thread; returned promise is resolved when get message back */
     postMessage(message, transfer) {
-        return this._promise = this._promise.finally(() => {
+        return this._promise = this._promise.catch(() => { }).then(() => {
             return new Promise((resolve, reject) => {
                 this._worker.addEventListener('message', function onMessage(e) {
                     console.assert(Array.isArray(e.data), 'Unknown message type posted: ', e);

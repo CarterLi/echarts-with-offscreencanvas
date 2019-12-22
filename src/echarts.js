@@ -1,8 +1,5 @@
-(function (global, factory) {
-	typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
-	typeof define === 'function' && define.amd ? define(['exports'], factory) :
-	(factory((global.echarts = {})));
-}(this, (function (exports) { 'use strict';
+const exports = {};
+if (!self.window) self.window = self;
 
 /*
 * Licensed to the Apache Software Foundation (ASF) under one
@@ -11270,7 +11267,7 @@ var ZRender = function (id, dom, opts) {
     this.storage = storage;
     this.painter = painter;
 
-    var handerProxy = (!env$1.node && !env$1.worker) ? new HandlerDomProxy(painter.getViewportRoot()) : null;
+    var handerProxy = !env$1.node ? new HandlerDomProxy(painter.getViewportRoot()) : null;
     this.handler = new Handler(storage, painter, handerProxy, painter.root);
 
     /**
@@ -25334,7 +25331,7 @@ var seriesColor = {
 
         // FIXME Set color function or use the platte color
         data.setVisual('color', color);
-        
+
         var borderColorAccessPath = (seriesModel.visualBorderColorAccessPath || 'itemStyle.borderColor').split('.');
         var borderColor = seriesModel.get(borderColorAccessPath);
         data.setVisual('borderColor', borderColor);
@@ -77437,12 +77434,16 @@ proto$2.onclick = function (ecModel, api) {
     var type = model.get('type', true) || 'png';
     var url = api.getConnectedDataURL({
         type: type,
+        title: title,
         backgroundColor: model.get('backgroundColor', true)
             || ecModel.get('backgroundColor') || '#fff',
         connectedBackgroundColor: model.get('connectedBackgroundColor'),
         excludeComponents: model.get('excludeComponents'),
         pixelRatio: model.get('pixelRatio')
     });
+    if (typeof api.saveAsImage === 'function') {
+        return api.saveAsImage(opts);
+    }
     // Chrome and Firefox
     if (typeof MouseEvent === 'function' && !env$1.browser.ie && !env$1.browser.edge) {
         var $a = document.createElement('a');
@@ -96228,5 +96229,4 @@ exports.Model = Model;
 exports.Axis = Axis;
 exports.env = env$1;
 
-})));
-//# sourceMappingURL=echarts.js.map
+export default exports;

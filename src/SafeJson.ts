@@ -79,7 +79,7 @@ export function parse(json: string) {
               error.stack = stack;
               return error;
             }
-            case 'arr': return new self[data[0]](data[1]);
+            case 'arr': return new (self[data[0]] as any)(data[1]);
           }
         }
         return obj;
