@@ -2,10 +2,10 @@
 # yarn lockfile v1
 
 
-"@types/echarts@^4.4.2":
-  version "4.4.2"
-  resolved "https://registry.npm.taobao.org/@types/echarts/download/@types/echarts-4.4.2.tgz#88be60b9b87bc65414f22d4150834538d62ac602"
-  integrity sha1-iL5gubh7xlQU8i1BUINFONYqxgI=
+"@types/echarts@^4.6.4":
+  version "4.6.4"
+  resolved "https://registry.npm.taobao.org/@types/echarts/download/@types/echarts-4.6.4.tgz#8c2418db319e23e0a2893cfdce34176237026f07"
+  integrity sha1-jCQY2zGeI+CiiTz9zjQXYjcCbwc=
   dependencies:
     "@types/zrender" "*"
 
@@ -14,7 +14,7 @@
   resolved "https://registry.npm.taobao.org/@types/zrender/download/@types/zrender-4.0.0.tgz#a6806f12ec4eccaaebd9b0d816f049aca6188fbd"
   integrity sha1-poBvEuxOzKrr2bDYFvBJrKYYj70=
 
-typescript@^3.7.5:
-  version "3.7.5"
-  resolved "https://registry.npm.taobao.org/typescript/download/typescript-3.7.5.tgz#0692e21f65fd4108b9330238aac11dd2e177a1ae"
-  integrity sha1-BpLiH2X9QQi5MwI4qsEd0uF3oa4=
+typescript@^3.9.7:
+  version "3.9.7"
+  resolved "https://registry.npm.taobao.org/typescript/download/typescript-3.9.7.tgz?cache=0&sync_timestamp=1597733591530&other_urls=https%3A%2F%2Fregistry.npm.taobao.org%2Ftypescript%2Fdownload%2Ftypescript-3.9.7.tgz#98d600a5ebdc38f40cb277522f12dc800e9e25fa"
+  integrity sha1-mNYApevcOPQMsndSLxLcgA6eJfo=
