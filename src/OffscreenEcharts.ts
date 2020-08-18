@@ -132,7 +132,10 @@ export class OffscreenEcharts implements IECharts {
   }
 
   async terminate(disposeEchartsFirst = true) {
-    if (disposeEchartsFirst) await this.postMessage('dispose');
+    if (disposeEchartsFirst) await this.postMessage({
+      type: 'dispose',
+      args: [],
+    });
     this._worker.terminate();
   }
 
