@@ -48316,7 +48316,7 @@
   "dataZoom": [
     {
       "type": "slider",
-      "show": false,
+      "show": true,
       "xAxisIndex": [
         0
       ]
