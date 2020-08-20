@@ -42,6 +42,12 @@ export class OffscreenEcharts {
             }
         });
     }
+    registerTheme(name, theme) {
+        return this.postMessage({
+            type: 'registerTheme',
+            args: [theme],
+        });
+    }
     async on(type, listener) {
         if (!this._eventsMap[type]) {
             this._eventsMap[type] = 0;
@@ -118,13 +124,19 @@ export class OffscreenEcharts {
             args: [stringify(option), ...args],
         });
     }
-    async terminate(disposeEchartsFirst = true) {
-        if (disposeEchartsFirst)
-            await this.postMessage('dispose');
+    dispatchAction(payload) {
+        return this.callMethod('dispatchAction', payload);
+    }
+    resize(opts) {
+        return this.callMethod('resize', opts);
+    }
+    dispose() {
+        // It's an noop of dispose method in worker
         this._worker.terminate();
     }
     /** Post message into worker thread; returned promise is resolved when get message back */
     postMessage(message, transfer) {
+        // eslint-disable-next-line arrow-body-style, @typescript-eslint/no-empty-function
         return this._promise = this._promise.catch(() => { }).then(() => {
             return new Promise((resolve, reject) => {
                 this._worker.addEventListener('message', function onMessage(e) {
@@ -142,8 +154,8 @@ export class OffscreenEcharts {
                             break;
                         }
                         case 'error': {
-                            const [name, message, stack] = data;
-                            const error = new self[name](message);
+                            const [name, msg, stack] = data;
+                            const error = new self[name](msg);
                             error.stack = stack;
                             reject(error);
                             this.removeEventListener('message', onMessage);

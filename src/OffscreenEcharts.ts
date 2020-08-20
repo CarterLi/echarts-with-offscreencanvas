@@ -1,6 +1,7 @@
 import { stringify } from './SafeJson.js';
+import type { IECharts } from './IEcharts';
 
-function copyByKeys(data: object, keys: string[]) {
+function copyByKeys(data: Record<string, any>, keys: string[]) {
   const result = {};
   keys.forEach(x => {
     if (x in data) result[x] = data[x];
@@ -44,6 +45,13 @@ export class OffscreenEcharts implements IECharts {
           $a.click();
         }
       }
+    });
+  }
+
+  registerTheme(name: string, theme: Record<string, any>) {
+    return this.postMessage({
+      type: 'registerTheme',
+      args: [theme],
     });
   }
 
@@ -124,23 +132,29 @@ export class OffscreenEcharts implements IECharts {
     });
   }
 
-  setOption(option: object, ...args: any[]) {
+  setOption(option: Record<string, any>, ...args: any[]) {
     return this.postMessage({
       type: 'setOption',
       args: [stringify(option), ...args],
     });
   }
 
-  async terminate(disposeEchartsFirst = true) {
-    if (disposeEchartsFirst) await this.postMessage({
-      type: 'dispose',
-      args: [],
-    });
+  dispatchAction(payload: Record<string, any>) {
+    return this.callMethod('dispatchAction', payload);
+  }
+
+  resize(opts?: echarts.EChartsResizeOption) {
+    return this.callMethod('resize', opts);
+  }
+
+  dispose() {
+    // It's an noop of dispose method in worker
     this._worker.terminate();
   }
 
   /** Post message into worker thread; returned promise is resolved when get message back */
   private postMessage(message: any, transfer?: Transferable[]) {
+    // eslint-disable-next-line arrow-body-style, @typescript-eslint/no-empty-function
     return this._promise = this._promise.catch(() => {}).then(() => {
       return new Promise((resolve, reject) => {
         this._worker.addEventListener('message', function onMessage(e) {
@@ -158,8 +172,8 @@ export class OffscreenEcharts implements IECharts {
               break;
             }
             case 'error': {
-              const [name, message, stack] = data as [string, string, string];
-              const error: Error = new self[name](message);
+              const [name, msg, stack] = data as [string, string, string];
+              const error: Error = new self[name](msg);
               error.stack = stack;
               reject(error);
               this.removeEventListener('message', onMessage);

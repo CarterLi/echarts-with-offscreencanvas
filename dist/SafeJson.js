@@ -15,30 +15,30 @@ export function stringify(value) {
     Date.prototype.toJSON = function toJSON() {
         return { '\0dt': new ValueWrapper(+this) };
     };
-    const json = JSON.stringify(value, (key, value) => {
-        if (!value)
-            return value;
+    const json = JSON.stringify(value, (key, val) => {
+        if (!val)
+            return val;
         if (key.startsWith('\0')) {
-            if (value instanceof ValueWrapper) {
-                return value.value;
+            if (val instanceof ValueWrapper) {
+                return val.value;
             }
             return undefined;
         }
-        if (typeof value === 'number') {
-            if (Number.isNaN(value) || !Number.isFinite(value)) {
-                return { '\0num': new ValueWrapper(value + '') };
+        if (typeof val === 'number') {
+            if (Number.isNaN(val) || !Number.isFinite(val)) {
+                return { '\0num': new ValueWrapper(val + '') };
             }
             else {
-                return value;
+                return val;
             }
         }
-        if (typeof value === 'object') {
-            const type = Object.prototype.toString.call(value).slice(8, -1);
+        if (typeof val === 'object') {
+            const type = Object.prototype.toString.call(val).slice(8, -1);
             switch (type) {
                 case 'Function':
-                    return { '\0fn': new ValueWrapper(value + '') };
+                    return { '\0fn': new ValueWrapper(val + '') };
                 case 'Error':
-                    return { '\0err': new ValueWrapper([value.name, value.message, value.stack]) };
+                    return { '\0err': new ValueWrapper([val.name, val.message, val.stack]) };
                 case 'Int8Array':
                 case 'Uint8Array':
                 case 'Uint8ClampedArray':
@@ -50,10 +50,10 @@ export function stringify(value) {
                 case 'Float64Array':
                 case 'Map':
                 case 'Set':
-                    return { '\0arr': new ValueWrapper([type, Array.from(value)]) };
+                    return { '\0arr': new ValueWrapper([type, Array.from(val)]) };
             }
         }
-        return value;
+        return val;
     });
     Date.prototype.toJSON = date2json;
     return json;
@@ -69,6 +69,7 @@ export function parse(json) {
                             const matched = /^function (\w+)\(\) { \[native code\] }$/.exec(data);
                             if (matched)
                                 return self[matched[1]];
+                            // eslint-disable-next-line @typescript-eslint/no-implied-eval
                             return new Function('"use strict"\nreturn ' + data)();
                         }
                         case 'num': return +data;

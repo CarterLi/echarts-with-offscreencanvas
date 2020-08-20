@@ -11,9 +11,12 @@ const events = new class WorkerEventHandler {
             throw new Error('Has been initialized');
         ctx.devicePixelRatio = opts.devicePixelRatio;
         const plot = this.plot = echarts.init(canvas, theme, opts);
-        plot._api.saveAsImage = async (opts) => {
-            ctx.postMessage(['saveAsImage', opts]);
+        plot._api.saveAsImage = (args) => {
+            ctx.postMessage(['saveAsImage', args]);
         };
+    }
+    registerTheme(name, theme) {
+        echarts.registerTheme(name, theme);
     }
     addEventListener(type) {
         this.plot.off(type);

@@ -3,6 +3,9 @@ export class FallbackEcharts {
     constructor() {
         this._plot = null;
     }
+    async registerTheme(name, theme) {
+        echarts.registerTheme(name, theme);
+    }
     async on(type, listener) {
         this._plot.on(type, listener);
         return { type, listener };
@@ -23,7 +26,13 @@ export class FallbackEcharts {
     async setOption(option, ...args) {
         return this._plot.setOption(option, ...args);
     }
-    async terminate() {
+    async dispatchAction(payload) {
+        return this._plot.dispatchAction(payload);
+    }
+    async resize(opts) {
+        this._plot.resize(opts);
+    }
+    dispose() {
         this._plot.dispose();
     }
 }

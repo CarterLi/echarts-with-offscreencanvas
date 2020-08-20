@@ -13,9 +13,13 @@ const events = new class WorkerEventHandler {
 
     ctx.devicePixelRatio = opts.devicePixelRatio;
     const plot = this.plot = echarts.init(canvas as any, theme, opts);
-    (plot as any)._api.saveAsImage = async opts => {
-      ctx.postMessage(['saveAsImage', opts]);
+    (plot as any)._api.saveAsImage = (args: any) => {
+      ctx.postMessage(['saveAsImage', args]);
     };
+  }
+
+  registerTheme(name: string, theme: Record<string, any>) {
+    echarts.registerTheme(name, theme);
   }
 
   addEventListener(type: string) {
@@ -30,7 +34,7 @@ const events = new class WorkerEventHandler {
     return this.plot.off(type);
   }
 
-  event(type: string, eventInitDict: object) {
+  event(type: string, eventInitDict: Record<string, any>) {
     return (this.plot.getDom() as any as OffscreenCanvas)
       .dispatchEvent(Object.assign(new Event(type), eventInitDict));
   }
