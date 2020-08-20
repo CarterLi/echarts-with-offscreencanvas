@@ -22,7 +22,8 @@ Echarts with OffscreenCanvas
 
 ## Modify Echarts source code
 
-1. Remove `&& !env.worker`
+1. Remove `&& !env.worker` to let echarts bind mouse events on `OffscreenCanvas`
+1. Add `&& !env.worker` to disable hoverLayerThreshold in worker. See https://github.com/apache/incubator-echarts/issues/13164
 1. Modify `SaveAsImage.prototype.onclick` to let it support `OffscreenCanvas`
 1. Optional: Remove UMD sh*t
 
@@ -32,7 +33,7 @@ See `patch.diff`
 
 1. Since no DOM operations available, all elements are rendered inside the canvas. Notably tooltips cannot be "popped" outside the chart.
 1. [DataView](https://www.echartsjs.com/option.html#toolbox.feature.dataView) because it operates DOM
-1. For charts that have very large dataset, tooltips can make the whole chart blank. It can be echarts bug, details unknown
+1. Cursor won't change ( can be fixed )
 
 ## Demo
 
