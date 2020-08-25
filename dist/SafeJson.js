@@ -35,8 +35,6 @@ export function stringify(value) {
         if (typeof val === 'object') {
             const type = Object.prototype.toString.call(val).slice(8, -1);
             switch (type) {
-                case 'Function':
-                    return { '\0fn': new ValueWrapper(val + '') };
                 case 'Error':
                     return { '\0err': new ValueWrapper([val.name, val.message, val.stack]) };
                 case 'Int8Array':
@@ -52,6 +50,9 @@ export function stringify(value) {
                 case 'Set':
                     return { '\0arr': new ValueWrapper([type, Array.from(val)]) };
             }
+        }
+        if (typeof val === 'function') {
+            return { '\0fn': new ValueWrapper(val + '') };
         }
         return val;
     });

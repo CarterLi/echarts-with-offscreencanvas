@@ -38,6 +38,60 @@ export class OffscreenEcharts {
                     $a.target = '_blank';
                     $a.href = this._canvas.toDataURL('image/' + data.type, data.quality);
                     $a.click();
+                    break;
+                }
+                case 'tooltip': {
+                    const { type, param } = data;
+                    switch (type) {
+                        case 'init': {
+                            const container = this._canvas.parentElement;
+                            const div = this._tooltip = document.createElement('div');
+                            Object.assign(div.style, {
+                                position: 'absolute',
+                                left: 0,
+                                top: 0,
+                                zIndex: 9999999,
+                                display: 'none',
+                                whiteSpace: 'pre-wrap',
+                                transitionProperty: 'transform',
+                                transitionTimingFunction: 'cubic-bezier(0.23, 1, 0.32, 1)',
+                                borderRadius: '4px',
+                            });
+                            container.style.position = 'relative';
+                            container.appendChild(div);
+                            break;
+                        }
+                        case 'show': {
+                            const div = this._tooltip;
+                            Object.assign(div.style, {
+                                backgroundColor: param.backgroundColor,
+                                ...param.textStyleModel,
+                                fontSize: param.textStyleModel.fontSize + 'px',
+                                padding: param.padding + 'px',
+                                transitionDuration: `${param.transitionDuration}s`,
+                                border: `${param.borderWidth}px solid ${param.borderColor}`,
+                                display: 'block',
+                            });
+                            if (param.extraCssText) {
+                                div.style.cssText += param.extraCssText;
+                            }
+                            break;
+                        }
+                        case 'setContent':
+                            this._tooltip.innerHTML = param;
+                            break;
+                        case 'moveTo':
+                            this._tooltip.style.transform = `translate(${param[0]}px, ${param[1]}px)`;
+                            break;
+                        case 'hide':
+                            this._tooltip.style.display = 'none';
+                            break;
+                        case 'dispose':
+                            this._tooltip.remove();
+                            this._tooltip = null;
+                            break;
+                    }
+                    break;
                 }
             }
         });

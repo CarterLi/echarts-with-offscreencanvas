@@ -1,9 +1,88 @@
+/* eslint-disable max-classes-per-file */
 import { parse } from './SafeJson.js';
 import echarts from './echarts.js';
 
 echarts.setCanvasCreator(() => new OffscreenCanvas(32, 32));
 
 const ctx: Worker = self as any;
+
+class TooltipContent {
+  private _isShow = false;
+  static readonly newLine = '\n';
+
+  constructor() {
+    ctx.postMessage(['tooltip', {
+      type: 'init',
+    }]);
+  }
+
+  update() {
+    // empty
+  }
+
+  show(tooltipModel) {
+    this._isShow = true;
+    ctx.postMessage(['tooltip', {
+      type: 'show',
+      param: {
+        transitionDuration: tooltipModel.get('transitionDuration'),
+        backgroundColor: tooltipModel.get('backgroundColor'),
+        textStyleModel: tooltipModel.getModel('textStyle').option,
+        padding: tooltipModel.get('padding'),
+        borderColor: tooltipModel.get('borderColor'),
+        borderWidth: tooltipModel.get('borderWidth'),
+        extraCssText: tooltipModel.get('extraCssText'),
+      },
+    }]);
+  }
+
+  setContent(content: string) {
+    ctx.postMessage(['tooltip', {
+      type: 'setContent',
+      param: content,
+    }]);
+  }
+
+  setEnterable(_enterable: boolean) {
+    // unimplemented
+  }
+
+  getSize() {
+    return [0,0];
+  }
+
+  moveTo(zrX: number, zrY: number) {
+    ctx.postMessage(['tooltip', {
+      type: 'moveTo',
+      param: [zrX, zrY],
+    }]);
+  }
+
+  hide() {
+    this._isShow = false;
+    ctx.postMessage(['tooltip', {
+      type: 'hide',
+    }]);
+  }
+
+  hideLater(_time: number) {
+    this.hide();
+  }
+
+  isShow() {
+    return this._isShow;
+  }
+
+  dispose() {
+    ctx.postMessage(['tooltip', {
+      type: 'dispose',
+    }]);
+  }
+
+  getOuterSize() {
+    return [0,0];
+  }
+}
 
 const events = new class WorkerEventHandler {
   plot: echarts.ECharts = null;
@@ -15,6 +94,9 @@ const events = new class WorkerEventHandler {
     const plot = this.plot = echarts.init(canvas as any, theme, opts);
     (plot as any)._api.saveAsImage = (args: any) => {
       ctx.postMessage(['saveAsImage', args]);
+    };
+    (plot as any).getZr().handler.proxy.setCursor = (cursorStyle: string) => {
+      ctx.postMessage(['setCursor', cursorStyle]);
     };
   }
 
@@ -44,7 +126,12 @@ const events = new class WorkerEventHandler {
   }
 
   setOption(json: string, ...args: any[]) {
-    return this.plot.setOption(parse(json), ...args);
+    const option = parse(json);
+    if (option.tooltip && typeof option.tooltip === 'object' && !option.tooltip.renderMode) {
+      option.tooltip.renderMode = 'html';
+      option.tooltip.renderer = TooltipContent;
+    }
+    return this.plot.setOption(option, ...args);
   }
 
   dispose() {
