@@ -7,7 +7,10 @@ function copyByKeys(data, keys) {
     });
     return result;
 }
-const mouseEventKeys = ['clientX', 'clientY', 'offsetX', 'offsetY', 'button', 'which', 'wheelDelta', 'detail'];
+const mouseEventKeys = [
+    'clientX', 'clientY', 'offsetX', 'offsetY',
+    'button', 'which', 'wheelDelta', 'detail',
+];
 const mouseEventNames = [
     'click', 'dblclick', 'mousewheel', 'mouseout',
     'mouseup', 'mousedown', 'contextmenu',
@@ -92,6 +95,9 @@ export class OffscreenEcharts {
                             break;
                     }
                     break;
+                }
+                case 'setCursor': {
+                    this._canvas.style.cursor = data;
                 }
             }
         });
@@ -187,6 +193,7 @@ export class OffscreenEcharts {
     dispose() {
         // It's an noop of dispose method in worker
         this._worker.terminate();
+        this._tooltip?.remove();
     }
     /** Post message into worker thread; returned promise is resolved when get message back */
     postMessage(message, transfer) {

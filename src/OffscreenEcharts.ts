@@ -9,7 +9,10 @@ function copyByKeys(data: Record<string, any>, keys: string[]) {
   return result;
 }
 
-const mouseEventKeys = ['clientX', 'clientY', 'offsetX', 'offsetY', 'button', 'which', 'wheelDelta', 'detail'];
+const mouseEventKeys = [
+  'clientX', 'clientY', 'offsetX', 'offsetY',
+  'button', 'which', 'wheelDelta', 'detail',
+];
 const mouseEventNames = [
   'click', 'dblclick', 'mousewheel', 'mouseout',
   'mouseup', 'mousedown', 'contextmenu',
@@ -26,7 +29,7 @@ export class OffscreenEcharts implements IECharts {
   constructor() {
     this._worker.addEventListener('message', e => {
       console.assert(Array.isArray(e.data), 'Unknown message type posted: ', e);
-      const [type, data] = e.data;
+      const [type, data] = e.data as [string, any];
       switch (type) {
         case 'event': {
           const { type } = data;
@@ -98,6 +101,9 @@ export class OffscreenEcharts implements IECharts {
               break;
           }
           break;
+        }
+        case 'setCursor': {
+          this._canvas.style.cursor = data;
         }
       }
     });
@@ -205,6 +211,7 @@ export class OffscreenEcharts implements IECharts {
   dispose() {
     // It's an noop of dispose method in worker
     this._worker.terminate();
+    this._tooltip?.remove();
   }
 
   /** Post message into worker thread; returned promise is resolved when get message back */
@@ -214,7 +221,7 @@ export class OffscreenEcharts implements IECharts {
       return new Promise((resolve, reject) => {
         this._worker.addEventListener('message', function onMessage(e) {
           console.assert(Array.isArray(e.data), 'Unknown message type posted: ', e);
-          const [type, data] = e.data;
+          const [type, data] = e.data as [string, any];
           switch (type) {
             case 'resolve': {
               resolve(data);
