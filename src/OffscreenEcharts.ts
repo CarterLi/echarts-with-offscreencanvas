@@ -65,6 +65,7 @@ export class OffscreenEcharts implements IECharts {
                 transitionProperty: 'transform',
                 transitionTimingFunction: 'cubic-bezier(0.23, 1, 0.32, 1)',
                 borderRadius: '4px',
+                pointerEvents: 'none',
               });
               container.style.position = 'relative';
               container.appendChild(div);
@@ -74,13 +75,17 @@ export class OffscreenEcharts implements IECharts {
               const div = this._tooltip;
               Object.assign(div.style, {
                 backgroundColor: param.backgroundColor,
-                ...param.textStyleModel,
-                fontSize: param.textStyleModel.fontSize + 'px',
                 padding: param.padding + 'px',
                 transitionDuration: `${param.transitionDuration}s`,
                 border: `${param.borderWidth}px solid ${param.borderColor}`,
                 display: 'block',
               } as CSSStyleDeclaration);
+              if (param.textStyleModel) {
+                Object.assign(div.style, {
+                  ...param.textStyleModel,
+                  fontSize: param.textStyleModel.fontSize + 'px',
+                });
+              }
               if (param.extraCssText) {
                 div.style.cssText += param.extraCssText;
               }
@@ -112,7 +117,7 @@ export class OffscreenEcharts implements IECharts {
   registerTheme(name: string, theme: Record<string, any>) {
     return this.postMessage({
       type: 'registerTheme',
-      args: [theme],
+      args: [name, theme],
     });
   }
 
