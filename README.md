@@ -26,14 +26,14 @@ Echarts with OffscreenCanvas
 1. Add `&& !env.worker` to disable hoverLayerThreshold in worker. See https://github.com/apache/incubator-echarts/issues/13164
 1. Modify `SaveAsImage.prototype.onclick` to let it support `OffscreenCanvas`
 1. Optional: Remove UMD sh*t
+1. Optional: Modify `tooltip.init` to let it accept a customized `TooltipContent` implementation
 
 See `patch.diff`
 
 ## Known issues
 
-1. Since no DOM operations available, all elements are rendered inside the canvas. Notably tooltips cannot be "popped" outside the chart.
-1. [DataView](https://www.echartsjs.com/option.html#toolbox.feature.dataView) because it operates DOM
-1. Cursor won't change ( can be fixed )
+1. [DataView](https://www.echartsjs.com/option.html#toolbox.feature.dataView) because it operates DOM ( won't fix because few people use it )
+1. [Group](https://echarts.apache.org/zh/api.html#echartsInstance.group) doesn't work (yet)
 
 ## Demo
 

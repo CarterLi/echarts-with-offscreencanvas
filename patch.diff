@@ -1,8 +1,8 @@
 1,5c1,2
 < (function (global, factory) {
-<       typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
-<       typeof define === 'function' && define.amd ? define(['exports'], factory) :
-<       (factory((global.echarts = {})));
+< 	typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
+< 	typeof define === 'function' && define.amd ? define(['exports'], factory) :
+< 	(factory((global.echarts = {})));
 < }(this, (function (exports) { 'use strict';
 ---
 > const exports = {};
@@ -21,7 +21,17 @@
 >     if (typeof api.saveAsImage === 'function') {
 >         return api.saveAsImage(opts);
 >     }
-98327,98328c98328
+83399a83401
+>         var renderer = tooltipModel.get('renderer');
+83402c83404,83408
+<         if (this._renderMode === 'html') {
+---
+>         if (renderer) {
+>             tooltipContent = new renderer();
+>             this._newLine = renderer.newLine;
+>         }
+>         else if (this._renderMode === 'html') {
+98327,98328c98333
 < })));
 < //# sourceMappingURL=echarts.js.map
 ---
