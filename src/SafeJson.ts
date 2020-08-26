@@ -10,7 +10,7 @@ function* iterateObject(obj: Record<string, any>) {
   }
 }
 
-export function stringify(value: any) {
+export function stringify(value: any, excludePattern?: RegExp) {
   const date2json = Date.prototype.toJSON; // trap
   Date.prototype.toJSON = function toJSON() {
     return { '\0dt': new ValueWrapper(+this) } as any;
@@ -21,6 +21,9 @@ export function stringify(value: any) {
       if (val instanceof ValueWrapper) {
         return val.value;
       }
+      return undefined;
+    }
+    if (excludePattern?.test(key)) {
       return undefined;
     }
 
@@ -65,13 +68,16 @@ export function parse(json: string) {
     if (obj && typeof obj === 'object' && !Array.isArray(obj)) {
       for (const [type, data] of iterateObject(obj)) {
         if (type.charCodeAt(0) === 0) {
-          switch (type.slice(0)) {
+          switch (type.slice(1)) {
             case 'dt': return new Date(data);
             case 'fn': {
-              const matched = /^function (\w+)\(\) { \[native code\] }$/.exec(data);
+              let body = data as string;
+              const matched = /^function (\w+)\(\) { \[native code\] }$/.exec(body);
               if (matched) return self[matched[1]];
+              // Object member function doesn't start with `function` eg `{ f() {} }`
+              if (!/^function |=>/.test(body)) body = 'function ' + body;
               // eslint-disable-next-line @typescript-eslint/no-implied-eval
-              return new Function('"use strict"\nreturn ' + data)() as () => any;
+              return new Function(`"use strict"\nreturn (${body})`)() as () => any;
             }
             case 'num': return +data;
             case 'err': {

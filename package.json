@@ -11,6 +11,7 @@
     "typescript": "^4.0.2"
   },
   "scripts": {
-    "build": "tsc -p . && (cd dist && ln -s ../src/echarts.js -f)"
+    "build": "tsc -p . && (cd dist && ln -s ../src/echarts.js -f)",
+    "dev": "tsc -p . -w"
   }
 }

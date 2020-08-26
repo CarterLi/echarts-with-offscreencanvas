@@ -23,8 +23,8 @@ export class OffscreenEcharts {
         this._promise = Promise.resolve(undefined);
         this._worker.addEventListener('message', e => {
             console.assert(Array.isArray(e.data), 'Unknown message type posted: ', e);
-            const [type, data] = e.data;
-            switch (type) {
+            const [msgType, data] = e.data;
+            switch (msgType) {
                 case 'event': {
                     const { type } = data;
                     delete data.type;
@@ -59,6 +59,8 @@ export class OffscreenEcharts {
                                 transitionProperty: 'transform',
                                 transitionTimingFunction: 'cubic-bezier(0.23, 1, 0.32, 1)',
                                 borderRadius: '4px',
+                                borderStyle: 'solid',
+                                pointerEvents: 'none',
                             });
                             container.style.position = 'relative';
                             container.appendChild(div);
@@ -66,15 +68,8 @@ export class OffscreenEcharts {
                         }
                         case 'show': {
                             const div = this._tooltip;
-                            Object.assign(div.style, {
-                                backgroundColor: param.backgroundColor,
-                                ...param.textStyleModel,
-                                fontSize: param.textStyleModel.fontSize + 'px',
-                                padding: param.padding + 'px',
-                                transitionDuration: `${param.transitionDuration}s`,
-                                border: `${param.borderWidth}px solid ${param.borderColor}`,
-                                display: 'block',
-                            });
+                            Object.assign(div.style, param);
+                            div.style.display = 'block';
                             if (param.extraCssText) {
                                 div.style.cssText += param.extraCssText;
                             }
@@ -105,7 +100,7 @@ export class OffscreenEcharts {
     registerTheme(name, theme) {
         return this.postMessage({
             type: 'registerTheme',
-            args: [theme],
+            args: [name, JSON.stringify(theme)],
         });
     }
     async on(type, listener) {
@@ -181,7 +176,7 @@ export class OffscreenEcharts {
     setOption(option, ...args) {
         return this.postMessage({
             type: 'setOption',
-            args: [stringify(option), ...args],
+            args: [stringify(option, /^[\$_]/), ...args],
         });
     }
     dispatchAction(payload) {

@@ -22,13 +22,18 @@ class TooltipContent {
 
   show(tooltipModel) {
     this._isShow = true;
+    const textStyleModel = tooltipModel.getModel('textStyle');
     ctx.postMessage(['tooltip', {
       type: 'show',
       param: {
-        transitionDuration: tooltipModel.get('transitionDuration'),
+        transitionDuration: tooltipModel.get('transitionDuration') + 's',
         backgroundColor: tooltipModel.get('backgroundColor'),
-        textStyleModel: tooltipModel.getModel('textStyle').option,
-        padding: tooltipModel.get('padding'),
+        color: textStyleModel.getTextColor(),
+        font: textStyleModel.getFont(),
+        fontSize: textStyleModel.get('fontSize') + 'px',
+        textDecoration: textStyleModel.get('decoration'),
+        textAlign: textStyleModel.get('align'),
+        padding: tooltipModel.get('padding') + 'px',
         borderColor: tooltipModel.get('borderColor'),
         borderWidth: tooltipModel.get('borderWidth'),
         extraCssText: tooltipModel.get('extraCssText'),
@@ -59,14 +64,18 @@ class TooltipContent {
   }
 
   hide() {
-    this._isShow = false;
-    ctx.postMessage(['tooltip', {
-      type: 'hide',
-    }]);
+    if (this._isShow) {
+      this._isShow = false;
+      ctx.postMessage(['tooltip', {
+        type: 'hide',
+      }]);
+    }
   }
 
   hideLater(_time: number) {
-    this.hide();
+    if (this._isShow) {
+      setTimeout(() => this.hide(), _time);
+    }
   }
 
   isShow() {
@@ -100,8 +109,8 @@ const events = new class WorkerEventHandler {
     };
   }
 
-  registerTheme(name: string, theme: Record<string, any>) {
-    echarts.registerTheme(name, theme);
+  registerTheme(name: string, theme: string) {
+    echarts.registerTheme(name, JSON.parse(theme));
   }
 
   addEventListener(type: string) {

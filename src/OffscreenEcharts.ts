@@ -29,8 +29,8 @@ export class OffscreenEcharts implements IECharts {
   constructor() {
     this._worker.addEventListener('message', e => {
       console.assert(Array.isArray(e.data), 'Unknown message type posted: ', e);
-      const [type, data] = e.data as [string, any];
-      switch (type) {
+      const [msgType, data] = e.data as [string, any];
+      switch (msgType) {
         case 'event': {
           const { type } = data;
           delete data.type;
@@ -65,6 +65,7 @@ export class OffscreenEcharts implements IECharts {
                 transitionProperty: 'transform',
                 transitionTimingFunction: 'cubic-bezier(0.23, 1, 0.32, 1)',
                 borderRadius: '4px',
+                borderStyle: 'solid',
                 pointerEvents: 'none',
               });
               container.style.position = 'relative';
@@ -73,19 +74,8 @@ export class OffscreenEcharts implements IECharts {
             }
             case 'show': {
               const div = this._tooltip;
-              Object.assign(div.style, {
-                backgroundColor: param.backgroundColor,
-                padding: param.padding + 'px',
-                transitionDuration: `${param.transitionDuration}s`,
-                border: `${param.borderWidth}px solid ${param.borderColor}`,
-                display: 'block',
-              } as CSSStyleDeclaration);
-              if (param.textStyleModel) {
-                Object.assign(div.style, {
-                  ...param.textStyleModel,
-                  fontSize: param.textStyleModel.fontSize + 'px',
-                });
-              }
+              Object.assign(div.style, param as CSSStyleDeclaration);
+              div.style.display = 'block';
               if (param.extraCssText) {
                 div.style.cssText += param.extraCssText;
               }
@@ -117,7 +107,7 @@ export class OffscreenEcharts implements IECharts {
   registerTheme(name: string, theme: Record<string, any>) {
     return this.postMessage({
       type: 'registerTheme',
-      args: [name, theme],
+      args: [name, JSON.stringify(theme)],
     });
   }
 
@@ -201,7 +191,7 @@ export class OffscreenEcharts implements IECharts {
   setOption(option: Record<string, any>, ...args: any[]) {
     return this.postMessage({
       type: 'setOption',
-      args: [stringify(option), ...args],
+      args: [stringify(option, /^[\$_]/), ...args],
     });
   }
 
