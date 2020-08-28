@@ -1,38 +1,111 @@
-1,5c1,2
-< (function (global, factory) {
-< 	typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
-< 	typeof define === 'function' && define.amd ? define(['exports'], factory) :
-< 	(factory((global.echarts = {})));
-< }(this, (function (exports) { 'use strict';
----
-> const exports = {};
-> if (!self.window) self.window = self;
-11700c11697
-<     var handerProxy = (!env$1.node && !env$1.worker) ? new HandlerDomProxy(painter.getViewportRoot(), painter.root) : null;
----
->     var handerProxy = !env$1.node ? new HandlerDomProxy(painter.getViewportRoot(), painter.root) : null;
-29518c29515
-<     if (elCount > ecModel.get('hoverLayerThreshold') && !env$1.node) {
----
->     if (elCount > ecModel.get('hoverLayerThreshold') && !env$1.node && !env$1.worker) {
-79415a79413
->         title: title,
-79421a79420,79422
->     if (typeof api.saveAsImage === 'function') {
->         return api.saveAsImage(opts);
->     }
-83399a83401
->         var renderer = tooltipModel.get('renderer');
-83402c83404,83408
-<         if (this._renderMode === 'html') {
----
->         if (renderer) {
->             tooltipContent = new renderer();
->             this._newLine = renderer.newLine;
->         }
->         else if (this._renderMode === 'html') {
-98327,98328c98333
-< })));
-< //# sourceMappingURL=echarts.js.map
----
-> export default exports;
+diff --git a/patch.diff b/patch.diff
+index 14f19c2..e69de29 100644
+--- a/patch.diff
++++ b/patch.diff
+@@ -1,38 +0,0 @@
+-1,5c1,2
+-< (function (global, factory) {
+-< 	typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
+-< 	typeof define === 'function' && define.amd ? define(['exports'], factory) :
+-< 	(factory((global.echarts = {})));
+-< }(this, (function (exports) { 'use strict';
+----
+-> const exports = {};
+-> if (!self.window) self.window = self;
+-11700c11697
+-<     var handerProxy = (!env$1.node && !env$1.worker) ? new HandlerDomProxy(painter.getViewportRoot(), painter.root) : null;
+----
+->     var handerProxy = !env$1.node ? new HandlerDomProxy(painter.getViewportRoot(), painter.root) : null;
+-29518c29515
+-<     if (elCount > ecModel.get('hoverLayerThreshold') && !env$1.node) {
+----
+->     if (elCount > ecModel.get('hoverLayerThreshold') && !env$1.node && !env$1.worker) {
+-79415a79413
+->         title: title,
+-79421a79420,79422
+->     if (typeof api.saveAsImage === 'function') {
+->         return api.saveAsImage(opts);
+->     }
+-83399a83401
+->         var renderer = tooltipModel.get('renderer');
+-83402c83404,83408
+-<         if (this._renderMode === 'html') {
+----
+->         if (renderer) {
+->             tooltipContent = new renderer();
+->             this._newLine = renderer.newLine;
+->         }
+->         else if (this._renderMode === 'html') {
+-98327,98328c98333
+-< })));
+-< //# sourceMappingURL=echarts.js.map
+----
+-> export default exports;
+diff --git a/src/echarts.js b/src/echarts.js
+index 5c36a4c..51b59b3 100644
+--- a/src/echarts.js
++++ b/src/echarts.js
+@@ -1,8 +1,5 @@
+-(function (global, factory) {
+-	typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
+-	typeof define === 'function' && define.amd ? define(['exports'], factory) :
+-	(factory((global.echarts = {})));
+-}(this, (function (exports) { 'use strict';
++const exports = {};
++if (!self.window) self.window = self;
+ 
+ /*
+ * Licensed to the Apache Software Foundation (ASF) under one
+@@ -11697,7 +11694,7 @@ var ZRender = function (id, dom, opts) {
+     this.storage = storage;
+     this.painter = painter;
+ 
+-    var handerProxy = (!env$1.node && !env$1.worker) ? new HandlerDomProxy(painter.getViewportRoot(), painter.root) : null;
++    var handerProxy = !env$1.node ? new HandlerDomProxy(painter.getViewportRoot(), painter.root) : null;
+     this.handler = new Handler(storage, painter, handerProxy, painter.root);
+ 
+     /**
+@@ -29515,7 +29512,7 @@ function updateHoverLayerStatus(ecIns, ecModel) {
+         elCount++;
+     });
+ 
+-    if (elCount > ecModel.get('hoverLayerThreshold') && !env$1.node) {
++    if (elCount > ecModel.get('hoverLayerThreshold') && !env$1.node && !env$1.worker) {
+         ecModel.eachSeries(function (seriesModel) {
+             if (seriesModel.preventUsingHoverLayer) {
+                 return;
+@@ -79810,6 +79807,12 @@ proto$2.onclick = function (ecModel, api) {
+     var title = model.get('name') || ecModel.get('title.0.text') || 'echarts';
+     var isSvg = api.getZr().painter.getType() === 'svg';
+     var type = isSvg ? 'svg' : model.get('type', true) || 'png';
++    if (typeof api.saveAsImage === 'function') {
++        return api.saveAsImage({
++            title: title,
++            type: type,
++        });
++    }
+     var url = api.getConnectedDataURL({
+         type: type,
+         backgroundColor: model.get('backgroundColor', true)
+@@ -83880,8 +83883,13 @@ extendComponentView({
+         var renderMode = tooltipModel.get('renderMode');
+         this._renderMode = getTooltipRenderMode(renderMode);
+ 
++        var renderer = tooltipModel.get('renderer');
+         var tooltipContent;
+-        if (this._renderMode === 'html') {
++        if (renderer) {
++            tooltipContent = new renderer();
++            this._newLine = renderer.newLine;
++        }
++        else if (this._renderMode === 'html') {
+             tooltipContent = new TooltipContent(api.getDom(), api, {
+                 appendToBody: tooltipModel.get('appendToBody', true)
+             });
+@@ -98856,5 +98864,4 @@ exports.Model = Model;
+ exports.Axis = Axis;
+ exports.env = env$1;
+ 
+-})));
+-//# sourceMappingURL=echarts.js.map
++export default exports;

@@ -1,8 +1,5 @@
-(function (global, factory) {
-	typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
-	typeof define === 'function' && define.amd ? define(['exports'], factory) :
-	(factory((global.echarts = {})));
-}(this, (function (exports) { 'use strict';
+const exports = {};
+if (!self.window) self.window = self;
 
 /*
 * Licensed to the Apache Software Foundation (ASF) under one
@@ -11697,7 +11694,7 @@ var ZRender = function (id, dom, opts) {
     this.storage = storage;
     this.painter = painter;
 
-    var handerProxy = (!env$1.node && !env$1.worker) ? new HandlerDomProxy(painter.getViewportRoot(), painter.root) : null;
+    var handerProxy = !env$1.node ? new HandlerDomProxy(painter.getViewportRoot(), painter.root) : null;
     this.handler = new Handler(storage, painter, handerProxy, painter.root);
 
     /**
@@ -29515,7 +29512,7 @@ function updateHoverLayerStatus(ecIns, ecModel) {
         elCount++;
     });
 
-    if (elCount > ecModel.get('hoverLayerThreshold') && !env$1.node) {
+    if (elCount > ecModel.get('hoverLayerThreshold') && !env$1.node && !env$1.worker) {
         ecModel.eachSeries(function (seriesModel) {
             if (seriesModel.preventUsingHoverLayer) {
                 return;
@@ -79810,6 +79807,12 @@ proto$2.onclick = function (ecModel, api) {
     var title = model.get('name') || ecModel.get('title.0.text') || 'echarts';
     var isSvg = api.getZr().painter.getType() === 'svg';
     var type = isSvg ? 'svg' : model.get('type', true) || 'png';
+    if (typeof api.saveAsImage === 'function') {
+        return api.saveAsImage({
+            title: title,
+            type: type,
+        });
+    }
     var url = api.getConnectedDataURL({
         type: type,
         backgroundColor: model.get('backgroundColor', true)
@@ -83880,8 +83883,13 @@ extendComponentView({
         var renderMode = tooltipModel.get('renderMode');
         this._renderMode = getTooltipRenderMode(renderMode);
 
+        var renderer = tooltipModel.get('renderer');
         var tooltipContent;
-        if (this._renderMode === 'html') {
+        if (renderer) {
+            tooltipContent = new renderer();
+            this._newLine = renderer.newLine;
+        }
+        else if (this._renderMode === 'html') {
             tooltipContent = new TooltipContent(api.getDom(), api, {
                 appendToBody: tooltipModel.get('appendToBody', true)
             });
@@ -98856,5 +98864,4 @@ exports.Model = Model;
 exports.Axis = Axis;
 exports.env = env$1;
 
-})));
-//# sourceMappingURL=echarts.js.map
+export default exports;

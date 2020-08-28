@@ -39,7 +39,7 @@ export class OffscreenEcharts {
                     const $a = document.createElement('a');
                     $a.download = `${data.title}.${data.type}`;
                     $a.target = '_blank';
-                    $a.href = this._canvas.toDataURL('image/' + data.type, data.quality);
+                    $a.href = this._canvas.toDataURL('image/' + data.type);
                     $a.click();
                     break;
                 }
