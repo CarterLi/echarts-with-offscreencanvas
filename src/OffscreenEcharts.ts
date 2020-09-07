@@ -55,6 +55,7 @@ export class OffscreenEcharts implements IECharts {
             case 'init': {
               const container = this._canvas.parentElement as HTMLDivElement;
               const div = this._tooltip = document.createElement('div');
+              const appendToBody = param.appendToBody as boolean;
               Object.assign(div.style, {
                 position: 'absolute',
                 left: 0,
@@ -67,15 +68,22 @@ export class OffscreenEcharts implements IECharts {
                 borderRadius: '4px',
                 borderStyle: 'solid',
                 pointerEvents: 'none',
+                contain: 'content',
               });
-              container.style.position = 'relative';
-              container.appendChild(div);
+              if (appendToBody) {
+                document.body.append(div);
+              } else {
+                container.style.position = 'relative';
+                container.appendChild(div);
+              }
               break;
             }
             case 'show': {
               const div = this._tooltip;
               Object.assign(div.style, param as CSSStyleDeclaration);
-              div.style.display = 'block';
+              if (this._tooltip.parentElement !== document.body) {
+                div.style.display = 'block';
+              }
               if (param.extraCssText) {
                 div.style.cssText += param.extraCssText;
               }
@@ -85,7 +93,15 @@ export class OffscreenEcharts implements IECharts {
               this._tooltip.innerHTML = param;
               break;
             case 'moveTo':
-              this._tooltip.style.transform = `translate(${param[0]}px, ${param[1]}px)`;
+              const { style } = this._tooltip;
+              if (this._tooltip.parentElement === document.body) {
+                const container = this._canvas.parentElement as HTMLDivElement;
+                const { left, top } = container.getBoundingClientRect();
+                style.display = 'block';
+                style.transform = `translate(${left + param[0]}px, ${top + param[1]}px)`;
+              } else {
+                style.transform = `translate(${param[0]}px, ${param[1]}px)`;
+              }
               break;
             case 'hide':
               this._tooltip.style.display = 'none';

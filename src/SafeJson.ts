@@ -72,10 +72,10 @@ export function parse(json: string) {
             case 'dt': return new Date(data);
             case 'fn': {
               let body = data as string;
-              const matched = /^function (\w+)\(\) { \[native code\] }$/.exec(body);
+              const matched = /^function\W\(\) { \[native code\] }$/.exec(body);
               if (matched) return self[matched[1]];
               // Object member function doesn't start with `function` eg `{ f() {} }`
-              if (!/^function |=>/.test(body)) body = 'function ' + body;
+              if (!/^function\W|=>/.test(body)) body = 'function ' + body;
               // eslint-disable-next-line @typescript-eslint/no-implied-eval
               return new Function(`"use strict"\nreturn (${body})`)() as () => any;
             }

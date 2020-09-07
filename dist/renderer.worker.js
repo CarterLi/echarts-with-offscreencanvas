@@ -4,10 +4,11 @@ import echarts from './echarts.js';
 echarts.setCanvasCreator(() => new OffscreenCanvas(32, 32));
 const ctx = self;
 class TooltipContent {
-    constructor() {
+    constructor(param) {
         this._isShow = false;
         ctx.postMessage(['tooltip', {
                 type: 'init',
+                param,
             }]);
     }
     update() {

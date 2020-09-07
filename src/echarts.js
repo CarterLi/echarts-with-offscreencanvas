@@ -83886,7 +83886,9 @@ extendComponentView({
         var renderer = tooltipModel.get('renderer');
         var tooltipContent;
         if (renderer) {
-            tooltipContent = new renderer();
+            tooltipContent = new renderer({
+                appendToBody: tooltipModel.get('appendToBody', true)
+            });
             this._newLine = renderer.newLine;
         }
         else if (this._renderMode === 'html') {

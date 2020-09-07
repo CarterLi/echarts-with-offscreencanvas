@@ -4,7 +4,8 @@
     "subtext": "纯属虚构"
   },
   "tooltip": {
-    "trigger": "axis"
+    "trigger": "axis",
+    "appendToBody": true
   },
   "legend": {
     "data": [

@@ -10,9 +10,10 @@ class TooltipContent {
   private _isShow = false;
   static readonly newLine = '\n';
 
-  constructor() {
+  constructor(param: Record<string, any>) {
     ctx.postMessage(['tooltip', {
       type: 'init',
+      param,
     }]);
   }
 
