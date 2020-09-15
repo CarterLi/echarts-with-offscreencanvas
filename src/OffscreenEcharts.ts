@@ -1,5 +1,6 @@
 import { stringify } from './SafeJson.js';
 import type { IECharts } from './IEcharts';
+import echarts from './echarts.js';
 
 function copyByKeys(data: Record<string, any>, keys: string[]) {
   const result = {};
@@ -10,8 +11,7 @@ function copyByKeys(data: Record<string, any>, keys: string[]) {
 }
 
 const mouseEventKeys = [
-  'clientX', 'clientY', 'offsetX', 'offsetY',
-  'button', 'which', 'wheelDelta', 'detail',
+  'zrX', 'zrY', 'zrDelta', 'which', 'button',
 ];
 const mouseEventNames = [
   'click', 'dblclick', 'mousewheel', 'mouseout',
@@ -183,15 +183,15 @@ export class OffscreenEcharts implements IECharts {
       blockEvent = true;
       this.postMessage({
         type: 'event',
-        args: [e.type, copyByKeys(e, mouseEventKeys)],
+        args: [e.type, copyByKeys(echarts.normalizeEvent(this._canvas, e), mouseEventKeys)],
       }).then(() => blockEvent = false);
     }, { passive: true });
 
     mouseEventNames.forEach(eventType => {
-      canvas.addEventListener(eventType, e => {
+      canvas.addEventListener(eventType, (e: MouseEvent | MouseWheelEvent) => {
         this.postMessage({
           type: 'event',
-          args: [e.type, copyByKeys(e, mouseEventKeys)],
+          args: [e.type, copyByKeys(echarts.normalizeEvent(this._canvas, e), mouseEventKeys)],
         });
       }, { passive: true });
     });

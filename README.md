@@ -16,13 +16,12 @@ Echarts with OffscreenCanvas
 
 1. A canvas cannot be used directly in worker, but OffscreenCanvas [can be used as a handle](https://developer.mozilla.org/en-US/docs/Web/API/OffscreenCanvas#Asynchronous_display_of_frames_produced_by_an_OffscreenCanvas) to control it.
 1. All rendering is done in worker. `Echarts` has plenty well worker support, with a few exception. Patched below.
-1. Mouse events are bind on the canvas in UI thread. When triggered, necessary event data is sent into worker using `postMessage`, then dispatches the event to `OffscreenCanvas` using `dispatchEvent`
+1. Mouse events are bind on the canvas in UI thread. When triggered, necessary event data is sent into worker using `postMessage`, then dispatches the event to echarts instance using its internal API. See https://github.com/ecomfe/zrender/pull/448#issuecomment-692451904
 1. All methods are dispatched into worker using `postMessage`, and return a promise immediately. After the method is called in worker, send its return value back to UI thread using `postMessage`, and then resolve the promise. See https://github.com/CarterLi/ThreadPool.js
 1. All Echarts events are bound in worker, and send event data back to UI thread when triggered. In UI thread, `DocumentFragment` is used as an event bus.
 
 ## Modify Echarts source code
 
-1. Remove `&& !env.worker` to let echarts bind mouse events on `OffscreenCanvas`
 1. Add `&& !env.worker` to disable hoverLayerThreshold in worker. See https://github.com/apache/incubator-echarts/issues/13164
 1. Modify `SaveAsImage.prototype.onclick` to let it support `OffscreenCanvas`
 1. Optional: Remove UMD sh*t

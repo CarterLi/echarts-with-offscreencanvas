@@ -11694,7 +11694,7 @@ var ZRender = function (id, dom, opts) {
     this.storage = storage;
     this.painter = painter;
 
-    var handerProxy = !env$1.node ? new HandlerDomProxy(painter.getViewportRoot(), painter.root) : null;
+    var handerProxy = (!env$1.node && !env$1.worker) ? new HandlerDomProxy(painter.getViewportRoot(), painter.root) : null;
     this.handler = new Handler(storage, painter, handerProxy, painter.root);
 
     /**
@@ -98865,5 +98865,6 @@ exports.List = List;
 exports.Model = Model;
 exports.Axis = Axis;
 exports.env = env$1;
+exports.normalizeEvent = normalizeEvent;
 
 export default exports;

@@ -127,8 +127,7 @@ const events = new class WorkerEventHandler {
   }
 
   event(type: string, eventInitDict: Record<string, any>) {
-    return (this.plot.getDom() as any as OffscreenCanvas)
-      .dispatchEvent(Object.assign(new Event(type), eventInitDict));
+    return (this.plot as any).getZr().handler.dispatch(type, eventInitDict);
   }
 
   callMethod(methodName: string, ...args: any[]) {

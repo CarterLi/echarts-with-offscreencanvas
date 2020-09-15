@@ -108,8 +108,7 @@ const events = new class WorkerEventHandler {
         return this.plot.off(type);
     }
     event(type, eventInitDict) {
-        return this.plot.getDom()
-            .dispatchEvent(Object.assign(new Event(type), eventInitDict));
+        return this.plot.getZr().handler.dispatch(type, eventInitDict);
     }
     callMethod(methodName, ...args) {
         return this.plot[methodName](...args);
